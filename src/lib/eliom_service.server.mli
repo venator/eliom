@@ -137,7 +137,7 @@ type registrable = [ `Registrable | `Unregistrable ]
     - [ 'ret] is an information on what the service returns.
             See {!Eliom_registration.kind}.
 *)
-type ('get,'post,+'meth,+'attached,+'kind,+'tipo,'gn,'pn,+'reg,+'ret) service
+type ('get,'post,+'meth,+'attached,+'kind,+'tipo,'gn,'pn,+'reg,'ret) service
   constraint 'meth = [< service_method ]
   constraint 'attached = [< attached]
   constraint 'kind = [< service_kind ]
@@ -175,12 +175,12 @@ val rt : 'rt rt
 
 (** Default module for creating services *)
 module Http : "sigs/eliom_service_with_external.mli"
-  subst type returnB := [> http_service ]
+  subst type returnB := http_service
   and type returnT := [< non_ocaml_service ]
 
 (** Module for creating services returning applications *)
 module App : "sigs/eliom_service.mli"
-  subst type returnB := [> appl_service ]
+  subst type returnB := appl_service
   and type returnT := [< non_ocaml_service ]
 
 (** Module for creating services that return OCaml values *)
