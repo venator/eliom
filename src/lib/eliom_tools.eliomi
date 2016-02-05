@@ -32,15 +32,14 @@ type ('a, 'b, 'c) one_page =
     (unit, unit,'a, attached, service_kind,
      [ `WithoutSuffix ],
      unit, unit,
-     'b, 'c) service
-constraint 'c = [< Eliom_registration.non_ocaml_service ]
+     'b, 'c Eliom_service.non_ocaml) service
 
 (** Hierarchical sites description. This is is a pair [(main page,
     subpages list)]. Each subpage is defined by the text to be
     displayed in menus and a {!hierarchical_site_item}. *)
-type ('a, 'b, 'c) hierarchical_site =
-    (('a, 'b) main_page *
-     ('c * ('a, 'b, 'c) hierarchical_site_item) list)
+type ('a, 'b, 'c, 'd) hierarchical_site =
+  (('a, 'b, 'd) main_page *
+   ('c * ('a, 'b, 'c, 'd) hierarchical_site_item) list)
 constraint 'a = [< Eliom_service.service_method ]
 constraint 'b = [< Eliom_service.registrable ]
 
@@ -48,11 +47,11 @@ constraint 'b = [< Eliom_service.registrable ]
    do not remove this comment ! *)
 
 (** Main page description for a section of a hierarchical site. *)
-and ('a, 'b) main_page =
-  | Main_page of ('a, 'b, Eliom_registration.non_ocaml_service) one_page
+and ('a, 'b, 'c) main_page =
+  | Main_page of ('a, 'b, 'c) one_page
     (** Main page for your subsite: all the subpages are subsections
 	of that page. *)
-  | Default_page of ('a, 'b, Eliom_registration.non_ocaml_service) one_page
+  | Default_page of ('a, 'b, 'c) one_page
     (** Like [Main_page] but is not taken into account for computing
 	which is the current page in the menu. Use it for example when
 	there is no main page, but you want one of the subpages to be
@@ -68,9 +67,9 @@ constraint 'b = [< Eliom_service.registrable ]
    do not remove this comment ! *)
 
 (** Menu entry description in a hierarchical site. *)
-and ('a, 'b, 'c) hierarchical_site_item =
+and ('a, 'b, 'c, 'd) hierarchical_site_item =
   | Disabled (** The menu entry is disabled. *)
-  | Site_tree of ('a, 'b, 'c) hierarchical_site (** The menu entry as a label and subsections. *)
+  | Site_tree of ('a, 'b, 'c, 'd) hierarchical_site (** The menu entry as a label and subsections. *)
 constraint 'a = [< Eliom_service.service_method ]
 constraint 'b = [< Eliom_service.registrable ]
 
@@ -101,8 +100,8 @@ module type HTML5_TOOLS = sig
     ?id:string ->
     (([< get_service_kind ] as 'a,
       [< registrable ] as 'b,
-      [< Eliom_registration.non_ocaml_service ] as 'c) one_page *
-        Html5_types.flow5_without_interactive Html5.elt list)
+      'c) one_page *
+     Html5_types.flow5_without_interactive Html5.elt list)
       list ->
     ?service:('a, 'b, 'c) one_page ->
     unit ->
@@ -130,7 +129,8 @@ module type HTML5_TOOLS = sig
     ?whole_tree:bool ->
     ([< Eliom_service.get_service_kind ] as 'a,
      [< Eliom_service.registrable ] as 'b,
-     Html5_types.a_content Html5.elt list)
+     Html5_types.a_content Html5.elt list,
+     _)
       hierarchical_site ->
     ?service:('a, 'b, 'c) one_page ->
     unit ->
@@ -156,9 +156,10 @@ module type HTML5_TOOLS = sig
     ?id:string ->
     ([< Eliom_service.get_service_kind ] as 'a,
      [< Eliom_service.registrable ] as 'b,
-     Html5_types.a_content Html5.elt list)
+     Html5_types.a_content Html5.elt list,
+     _)
       hierarchical_site ->
-    ?service:('a, 'b, [< Eliom_registration.non_ocaml_service]) one_page ->
+    ?service:('a, 'b, _) one_page ->
     unit ->
     [> `Ul ] Html5.elt list
 
@@ -172,9 +173,10 @@ module type HTML5_TOOLS = sig
   val structure_links :
     ([< Eliom_service.get_service_kind ] as 'a,
      [< Eliom_service.registrable ] as 'b,
-     Html5_types.a_content Html5.elt list)
+     Html5_types.a_content Html5.elt list,
+     _)
     hierarchical_site ->
-    ?service:('a, 'b, [< Eliom_registration.non_ocaml_service ]) one_page ->
+    ?service:('a, 'b, _) one_page ->
     unit ->
     [> `Link ] Html5.elt list
 

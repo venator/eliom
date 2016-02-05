@@ -71,7 +71,7 @@ type comet_service =
      [ `WithoutSuffix ], unit,
      [ `One of comet_request Eliom_parameter.ocaml ] Eliom_parameter.param_name,
      Eliom_service.registrable,
-     Eliom_registration.http_service )
+     Eliom_service.http Eliom_service.non_ocaml )
       Eliom_service.service
 
 type internal_comet_service =
@@ -80,7 +80,7 @@ type internal_comet_service =
      [ `WithoutSuffix ], unit,
      [ `One of comet_request Eliom_parameter.ocaml ] Eliom_parameter.param_name,
      [ `Registrable ],
-     Eliom_registration.http_service )
+     Eliom_service.http Eliom_service.non_ocaml )
       Eliom_service.service
 
 type stateless_kind =
@@ -100,7 +100,7 @@ type 'a bus_send_service =
      unit,
      [ `One of 'a list Eliom_parameter.ocaml ] Eliom_parameter.param_name,
      [ `Registrable ],
-     Eliom_registration.http_service
+     Eliom_service.http Eliom_service.non_ocaml
     ) Eliom_service.service
 
 type ('a, 'b) wrapped_bus = 'b wrapped_channel * 'a bus_send_service

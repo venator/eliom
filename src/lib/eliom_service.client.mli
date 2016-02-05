@@ -118,23 +118,21 @@ type registrable = [ `Registrable | `Unregistrable ]
             See {!Eliom_registration.kind}.
 *)
 type ('get,'post,+'meth,+'attached,+'kind,+'tipo,'gn,'pn,+'reg,+'ret) service
-  constraint 'meth = [< service_method ]
-  constraint 'attached = [< attached]
-  constraint 'kind = [< service_kind ]
-  constraint 'tipo = [< suff ]
-  constraint 'reg = [< registrable ]
-
-(** Types of groups of services. *)
-
-type http_service = [ `Http ]
-type appl_service = [ `Appl ]
-type +'a ocaml_service
-
-(** The type [non_ocaml_service] is used as phantom type parameters for
-    the {!Eliom_registration.kind}. It used to type functions that operates
-    over service that do not returns OCaml values, like
-    {!appl_self_redirect}. *)
-type non_ocaml_service = [ appl_service | http_service ]
+    constraint 'meth = [< `Get | `Post | `Put | `Delete ]
+    constraint 'attached = [< `Attached of a_s | `Nonattached of na_s]
+    constraint 'kind = [<
+      | `Service
+      | `AttachedCoservice
+      | `NonattachedCoservice
+      | `External
+    ]
+    constraint 'tipo = [< `WithSuffix | `WithoutSuffix ]
+    constraint 'reg = [< `Registrable | `Unregistrable ]
+  (* constraint 'meth = [< service_method ] *)
+  (* constraint 'attached = [< attached] *)
+  (* constraint 'kind = [< service_kind ] *)
+  (* constraint 'tipo = [< suff ] *)
+  (* constraint 'reg = [< registrable ] *)
 
 (** Helper for typing OCaml services.
     In some cases, you may need to write the return type of the
@@ -145,28 +143,35 @@ type non_ocaml_service = [ appl_service | http_service ]
     using the following value.
 
 *)
-type 'rt rt
-val rt : 'rt rt
 
-(***** Static dir and actions do not depend on the type of pages ******)
+type http
+type appl
 
-module Unsafe : "sigs/eliom_service_with_external.mli"
-  subst type returnB := 'returnB
-  and type returnT := 'returnT
-(** Module for creating services that are applications *)
-module App : "sigs/eliom_service.mli"
-  subst type returnB := [> appl_service ]
-  and type returnT := [< non_ocaml_service ]
-(** Module for creating services that returns OCaml values *)
-module Ocaml : "sigs/eliom_service_with_external.mli"
-  subst type returnB := 'rt ocaml_service
-  and type returnT := 'rt ocaml_service
-(** Default module for creating services *)
-module Http : "sigs/eliom_service_with_external.mli"
-  subst type returnB := [> http_service ]
-  and type returnT := [< non_ocaml_service ]
+type +'a ocaml
+type 'a non_ocaml
 
+type ext
+type non_ext
 
+type ('r, 'e) rt =
+  | Ocaml  : ('r ocaml, ext) rt
+  | Http   : (http non_ocaml, ext) rt
+  | Appl   : (appl non_ocaml, non_ext) rt
+  (* FIXME! temporary to get current registration modules
+     working. REMOVE! *)
+  | Unsafe : ('a, ext) rt
+
+include Eliom_service_sigs.S_with_external
+  with type a_s := a_s
+   and type na_s := na_s
+   and type ('a, 'b, +'c, +'d, +'e, +'f, 'g, 'h, +'i, +'j) service :=
+     ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j) service
+   and type ('r, 'e) rt := ('r, 'e) rt
+   and type http := http
+   and type appl := appl
+   and type 'a ocaml := 'a ocaml
+   and type 'a non_ocaml := 'a non_ocaml
+   and type ext := ext
 
 (** {2 Predefined services} *)
 
@@ -218,7 +223,7 @@ val https_static_dir_with_params :
 val void_coservice' :
   (unit, unit, [> `Get], [> non_attached_kind], [> `NonattachedCoservice],
    [ `WithoutSuffix ],
-   unit, unit, [> `Unregistrable ], [> non_ocaml_service ])
+   unit, unit, [> `Unregistrable ], _ non_ocaml)
   service
 (** A predefined non-attached action with special behaviour:
     it has no parameter at all, even non-attached parameters.
@@ -233,14 +238,14 @@ val void_coservice' :
 val https_void_coservice' :
   (unit, unit, [> `Get], [> non_attached_kind], [> `NonattachedCoservice],
    [ `WithoutSuffix ],
-   unit, unit, [> `Unregistrable ], [> non_ocaml_service ])
+   unit, unit, [> `Unregistrable ], _ non_ocaml)
   service
 (** The same, but forcing https. *)
 
 val void_hidden_coservice' :
   (unit, unit, [> `Get], [>non_attached_kind], [> `NonattachedCoservice],
    [ `WithoutSuffix ],
-   unit, unit, [> `Unregistrable ], [> non_ocaml_service ])
+   unit, unit, [> `Unregistrable ], _ non_ocaml)
   service
 (** Same as [void_coservice'] but keeps non attached GET parameters.
  *)
@@ -305,7 +310,7 @@ val static_dir :
   (string list, unit, [> `Get], [> attached_kind], [> `Service ],
    [ `WithSuffix ],
    [ `One of string list ] param_name, unit, [> `Unregistrable ],
-   [> http_service ])
+   http non_ocaml)
     service
 
 (** Same as {!static_dir} but forcing https link. *)
@@ -314,7 +319,7 @@ val https_static_dir :
   (string list, unit, [> `Get], [> attached_kind], [> `Service ],
    [ `WithSuffix ],
    [ `One of string list ] param_name, unit, [> `Unregistrable ],
-   [> http_service ])
+   http non_ocaml)
     service
 
 (** Like [static_dir], but allows one to put GET parameters *)
@@ -325,7 +330,7 @@ val static_dir_with_params :
   ((string list * 'a), unit, [> `Get], [> attached_kind], [> `Service ],
    [ `WithSuffix ],
    [ `One of string list ] param_name *'an, unit, [> `Unregistrable ],
-   [> http_service ])
+   http non_ocaml)
     service
 
 (** Same as {!static_dir_with_params} but forcing https link. *)
@@ -339,7 +344,7 @@ val https_static_dir_with_params :
    [> `Service ],
    [ `WithSuffix ],
    [ `One of string list ] param_name *'an, unit, [> `Unregistrable ],
-   [> http_service ])
+   http non_ocaml)
     service
 
 

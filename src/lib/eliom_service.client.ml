@@ -19,16 +19,7 @@
 
 include Eliom_service_base
 
-type http_service = [ `Http ]
-type appl_service = [ `Appl ]
-type +'a ocaml_service = [ `Ocaml of 'a ]
-
-type non_ocaml_service = [ appl_service | http_service ]
-
-type 'rt rt = unit
-let rt = ()
-
-module MakeBase = struct
+module Make = struct
   let service = service
   let post_service = post_service
   let put_service = put_service
@@ -45,19 +36,6 @@ module MakeBase = struct
   let external_post_service = external_post_service
   let external_put_service = external_put_service
   let external_delete_service = external_delete_service
-end
-
-module Unsafe = struct
-  include MakeBase
-end
-module App = struct
-  include MakeBase
-end
-module Ocaml = struct
-  include MakeBase
-end
-module Http = struct
-  include MakeBase
 end
 
 let xhr_with_cookies s =

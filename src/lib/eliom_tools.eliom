@@ -38,24 +38,23 @@ type ('a, 'b, 'c) one_page =
     (unit, unit, 'a, attached, service_kind,
      [ `WithoutSuffix ],
      unit, unit,
-     'b, 'c) service
+     'b, 'c Eliom_service.non_ocaml) service
     constraint 'a = [< Eliom_service.service_method ]
-    constraint 'c = [< Eliom_registration.non_ocaml_service ]
 
-type ('a, 'b, 'c) hierarchical_site_item =
+type ('a, 'b, 'c, 'd) hierarchical_site_item =
   | Disabled
-  | Site_tree of ('a, 'b, 'c) hierarchical_site
+  | Site_tree of ('a, 'b, 'c, 'd) hierarchical_site
   constraint 'a = [< Eliom_service.service_method ]
   constraint 'b = [< Eliom_service.registrable ]
-and ('a, 'b) main_page =
-  | Main_page of ('a, 'b, Eliom_registration.non_ocaml_service) one_page
-  | Default_page of ('a, 'b, Eliom_registration.non_ocaml_service) one_page
+and ('a, 'b, 'c) main_page =
+  | Main_page of ('a, 'b, 'c) one_page
+  | Default_page of ('a, 'b, 'c) one_page
   | Not_clickable
   constraint 'a = [< Eliom_service.service_method ]
   constraint 'b = [< Eliom_service.registrable ]
-and ('a, 'b, 'c) hierarchical_site =
-      (('a, 'b) main_page *
-         ('c * ('a, 'b, 'c) hierarchical_site_item) list)
+  and ('a, 'b, 'c, 'd) hierarchical_site =
+    (('a, 'b, 'd) main_page *
+     ('c * ('a, 'b, 'c, 'd) hierarchical_site_item) list)
   constraint 'a = [< Eliom_service.service_method ]
   constraint 'b = [< Eliom_service.registrable ]
 
@@ -81,7 +80,7 @@ module type HTML5_TOOLS = sig
     ?id:string ->
     (([< get_service_kind ] as 'a,
       [< registrable ] as 'b,
-      [< Eliom_registration.non_ocaml_service ] as 'c) one_page *
+      'c) one_page *
         Html5_types.flow5_without_interactive Html5.elt list)
       list ->
     ?service:('a, 'b, 'c) one_page ->
@@ -110,7 +109,8 @@ module type HTML5_TOOLS = sig
     ?whole_tree:bool ->
     ([< Eliom_service.get_service_kind ] as 'a,
      [< Eliom_service.registrable ] as 'b,
-     Html5_types.a_content Html5.elt list)
+     Html5_types.a_content Html5.elt list,
+     _)
       hierarchical_site ->
     ?service:('a, 'b, 'c) one_page ->
     unit ->
@@ -136,9 +136,10 @@ module type HTML5_TOOLS = sig
     ?id:string ->
     ([< Eliom_service.get_service_kind ] as 'a,
      [< Eliom_service.registrable ] as 'b,
-     Html5_types.a_content Html5.elt list)
+     Html5_types.a_content Html5.elt list,
+     _)
       hierarchical_site ->
-    ?service:('a, 'b, [< Eliom_registration.non_ocaml_service]) one_page ->
+    ?service:('a, 'b, _) one_page ->
     unit ->
     [> `Ul ] Html5.elt list
 
@@ -152,9 +153,10 @@ module type HTML5_TOOLS = sig
   val structure_links :
     ([< Eliom_service.get_service_kind ] as 'a,
      [< Eliom_service.registrable ] as 'b,
-     Html5_types.a_content Html5.elt list)
+     Html5_types.a_content Html5.elt list,
+     _)
     hierarchical_site ->
-    ?service:('a, 'b, [< Eliom_registration.non_ocaml_service ]) one_page ->
+    ?service:('a, 'b, _) one_page ->
     unit ->
     [> `Link ] Html5.elt list
 

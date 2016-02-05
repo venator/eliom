@@ -64,7 +64,7 @@ type 'a kind
     returned content is classical HTTP content described by the
     content type header. See {!Eliom_registration.kind} for a list of others
     return types. *)
-type http_service = Eliom_service.http_service
+type http_service = Eliom_service.http Eliom_service.non_ocaml
 
 (** The type [browser_content] is a refinement of {!http_service} to
     be used as a phantom type parameters for {!Eliom_registration.kind}. It
@@ -92,7 +92,7 @@ type unknown_content
     {!Eliom_service.service} and {!Eliom_registration.kind}. It means the
     service is part of an Eliom application. See {!Eliom_registration.kind}
     for a list of others return types. *)
-type appl_service = Eliom_service.appl_service
+type appl_service = Eliom_service.appl Eliom_service.non_ocaml
 
 (** The type [application_content] is a refinement of {!appl_service}
     to be used as a phantom type parameters for {!Eliom_registration.kind}. The
@@ -110,12 +110,6 @@ type 'a application_name
     to be used as a phantom type parameters for {!Eliom_registration.kind}. See
     {!Ocaml}. *)
 type 'a ocaml_content
-
-(** The type [non_ocaml_service] is used as phantom type parameters for
-    the {!Eliom_registration.kind}. It used to type functions that operates
-    over service that do not returns OCaml values, like
-    {!appl_self_redirect}. *)
-type non_ocaml_service = Eliom_service.non_ocaml_service
 
 (** {3 Module signature} *)
 
@@ -209,18 +203,18 @@ module type ELIOM_APPL = sig
   (** The type [appl] is an abstract type for identifying an
       application. It usually used a phantom parameter for
       {!application_content}. *)
-  type appl
+  type app_id
 
   include "sigs/eliom_reg.mli"
     subst type page    := Html5_types.html Eliom_content.Html5.elt
       and type options := appl_service_options
       and type return  := appl_service
-      and type returnB := [> appl_service ]
-      and type returnT := [< non_ocaml_service ]
-      and type result  := appl application_content kind
+      and type returnB := appl_service
+      and type returnT := appl_service
+      and type result  := app_id application_content kind
 
   (**/**)
-  val typed_name : appl application_name
+  val typed_name : app_id application_name
 
 end
 
@@ -241,9 +235,9 @@ module Eliom_tmpl (Appl : ELIOM_APPL) (Tmpl_param : TMPL_PARAMS): sig
   subst type page    := Tmpl_param.t
     and type options := appl_service_options
     and type return  := appl_service
-    and type returnB := [> appl_service ]
-    and type returnT := [< non_ocaml_service ]
-    and type result  := Appl.appl application_content kind
+    and type returnB := appl_service
+    and type returnT := appl_service
+    and type result  := Appl.app_id application_content kind
 
 end
 
@@ -260,8 +254,8 @@ module Flow5 : "sigs/eliom_reg.mli"
   subst type page    := Html5_types.flow5 Eliom_content.Html5.elt list
   and type options := unit
   and type return  := http_service
-  and type returnB := [> http_service ]
-  and type returnT := [< non_ocaml_service ]
+  and type returnB := http_service
+  and type returnT := http_service
   and type result  := block_content kind
 
 (** Eliom service registration for services that returns fragment of
@@ -276,8 +270,8 @@ module Make_typed_xml_registration
   subst type page    := E.content Typed_xml.elt list
   and type options := unit
   and type return  := http_service
-  and type returnB := [> http_service ]
-  and type returnT := [< non_ocaml_service ]
+  and type returnB := http_service
+  and type returnT := http_service
   and type result  := block_content kind
 
 (** {2 Untyped pages} *)
@@ -292,8 +286,8 @@ module Html_text : sig
     subst type page    := string
     and type options := unit
     and type return  := http_service
-    and type returnB := [> http_service ]
-    and type returnT := [< non_ocaml_service ]
+    and type returnB := http_service
+    and type returnT := http_service
     and type result  := browser_content kind
 
 end
@@ -309,8 +303,8 @@ module CssText : "sigs/eliom_reg.mli"
   subst type page  := string
   and type options := int
   and type return  := http_service
-  and type returnB := [> http_service ]
-  and type returnT := [< non_ocaml_service ]
+  and type returnB := http_service
+  and type returnT := http_service
   and type result  := browser_content kind
 
 (** {2 Other kinds of services} *)
@@ -330,8 +324,8 @@ module Action : "sigs/eliom_reg.mli"
  subst type page    := unit
    and type options := [ `Reload | `NoReload ]
    and type return  := http_service
-   and type returnB := [> http_service ]
-   and type returnT := [< non_ocaml_service ]
+   and type returnB := http_service
+   and type returnT := http_service
    and type result  := browser_content kind
 
 (** Similar to {!Actions} with [`NoReload] option. *)
@@ -339,8 +333,8 @@ module Unit : "sigs/eliom_reg.mli"
   subst type page    := unit
   and type options := unit
   and type return  := http_service
-  and type returnB := [> http_service ]
-  and type returnT := [< non_ocaml_service ]
+  and type returnB := http_service
+  and type returnT := http_service
   and type result  := browser_content kind
 
 (** Eliom service registration for services that returns a redirections
@@ -397,8 +391,8 @@ module String_redirection : "sigs/eliom_reg.mli"
 		      | `UseProxy
 		      | `TemporaryRedirect ]
   and type return  := http_service
-  and type returnB := [> http_service ]
-  and type returnT := [< non_ocaml_service ]
+  and type returnB := http_service
+  and type returnT := http_service
   and type result  := browser_content kind
 
 (** Eliom service registration for services that returns file
@@ -422,8 +416,8 @@ module File : sig
     subst type page    := string
       and type options := int
       and type return  := http_service
-      and type returnB := [> http_service ]
-      and type returnT := [< non_ocaml_service ]
+      and type returnB := http_service
+      and type returnT := http_service
       and type result  := browser_content kind
 
 end
@@ -444,8 +438,8 @@ module File_ct : sig
     subst type page    := string * string
       and type options := int
       and type return  := http_service
-      and type returnB := [> http_service ]
-      and type returnT := [< non_ocaml_service ]
+      and type returnB := http_service
+      and type returnT := http_service
       and type result  := browser_content kind
 
 end
@@ -457,9 +451,9 @@ end
 module Ocaml : "sigs/eliom_reg_simpl.mli"
   subst type page    := 'return
     and type options := unit
-    and type return  := 'return Eliom_service.ocaml_service
-    and type returnB := 'return Eliom_service.ocaml_service
-    and type returnT := 'return Eliom_service.ocaml_service
+    and type return  := 'return Eliom_service.ocaml
+    and type returnB := 'return Eliom_service.ocaml
+    and type returnT := 'return Eliom_service.ocaml
     and type result  := 'return ocaml_content kind
 
 (** Eliom service registration for services that choose dynamically
@@ -506,8 +500,8 @@ module String : "sigs/eliom_reg.mli"
   subst type page  := string * string
   and type options := int
   and type return  := http_service
-  and type returnB := [> http_service ]
-  and type returnT := [< non_ocaml_service ]
+  and type returnB := http_service
+  and type returnT := http_service
   and type result  := unknown_content kind
 
 (** Eliom service registration for services that returns "byte"
@@ -526,8 +520,8 @@ module Streamlist : "sigs/eliom_reg.mli"
   subst type page    := (((unit -> string Ocsigen_stream.t Lwt.t) list) * string)
   and type options := unit
   and type return  := http_service
-  and type returnB := [> http_service ]
-  and type returnT := [< non_ocaml_service ]
+  and type returnB := http_service
+  and type returnT := http_service
   and type result  := unknown_content kind
 
 (** {2 Customizing registration} *)

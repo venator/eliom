@@ -48,7 +48,7 @@ val change_page :
            [< Eliom_service.service_kind ],
            [< `WithSuffix | `WithoutSuffix ], 'd, 'e,
            [< Eliom_service.registrable ],
-           [< Eliom_registration.non_ocaml_service ])
+           _ Eliom_service.non_ocaml)
           Eliom_service.service ->
   ?hostname:string ->
   ?port:int ->
@@ -79,7 +79,7 @@ val call_ocaml_service :
            [< Eliom_service.attached ],
            [< Eliom_service.service_kind ],
            [< `WithSuffix | `WithoutSuffix ], 'd, 'e,
-           [< Eliom_service.registrable ], 'return Eliom_service.ocaml_service)
+           [< Eliom_service.registrable ], 'return Eliom_service.ocaml)
     Eliom_service.service ->
   ?hostname:string ->
   ?port:int ->
@@ -106,7 +106,7 @@ val exit_to :
            [< Eliom_service.service_kind ],
            [< `WithSuffix | `WithoutSuffix ], 'd, 'e,
            [< Eliom_service.registrable ],
-           [< Eliom_registration.non_ocaml_service ])
+           _ Eliom_service.non_ocaml)
           Eliom_service.service ->
   ?hostname:string ->
   ?port:int ->

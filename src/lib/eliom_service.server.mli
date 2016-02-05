@@ -21,28 +21,14 @@
 
 (** Creation and manipulation of Eliom services. *)
 
-(**
+(** See the Eliom manual for a detailed introduction to the concept of
+    {% <<a_manual chapter="server-services"|Eliom services>>%}. *)
 
-    {b See the Eliom manual for a detailed introduction to the concept of
-    {% <<a_manual chapter="server-services"|Eliom services>>%}.
-    }
-
-  {% <<outline| <<header| **Table of contents** >> >>%}
-*)
-
-(**
-   The main functions to create services are in modules
-   {% <<a_api subproject="server"|module Eliom_service.Http>>%} (default),
-   {% <<a_api subproject="server"|module Eliom_service.Ocaml>>%}
-   (for services returning OCaml values) and
-   {% <<a_api subproject="server"|module Eliom_service.App>>%}
-   (for services belonging to an Eliom client-server app).
-
- *)
+(** The main functions to create services are in {% <<a_api
+    subproject="server"|module Eliom_service>>%}. *)
 
 open Eliom_lib
 open Eliom_parameter
-
 
 (** {2 Type definitions for services} *)
 
@@ -55,18 +41,20 @@ open Eliom_parameter
     - (internal) non-attached coservices
 *)
 
-(** An internal attached service could either be a [`Service] or a [`AttachedCoservice]. *)
+(** An internal attached service could either be a [`Service] or a
+    [`AttachedCoservice]. *)
 type internal_attached_service_kind =
   [ `Service
   | `AttachedCoservice ]
 
-(** An internal service could either be an internal attached service or a [`NonattachedCoservice]. *)
+(** An internal service could either be an internal attached service
+    or a [`NonattachedCoservice]. *)
 type internal_service_kind =
   [ internal_attached_service_kind
   | `NonattachedCoservice ]
 
-(** An attached service could either be an internal Eliom service or an
-    abstraction for an [`External] service. *)
+(** An attached service could either be an internal Eliom service or
+    an abstraction for an [`External] service. *)
 type service_kind =
   [ internal_service_kind
   | `External ]
@@ -82,7 +70,6 @@ type na_s
 type attached_kind = [ `Attached of a_s ]
 type non_attached_kind = [ `Nonattached of na_s ]
 type attached = [ attached_kind | non_attached_kind ]
-
 
 (** {3 POST or GET parameters} *)
 
@@ -146,53 +133,36 @@ type ('get,'post,+'meth,+'attached,+'kind,+'tipo,'gn,'pn,+'reg,+'ret) service
 
 (** Types of groups of services. *)
 
-type http_service = [ `Http ]
-type appl_service = [ `Appl ]
-type +'a ocaml_service
+type http
+type appl
 
-(** The type [non_ocaml_service] is used as phantom type parameters for
-    the {!Eliom_registration.kind}. It used to type functions that operates
-    over service that do not returns OCaml values, like
-    {!appl_self_redirect}. *)
-type non_ocaml_service = [ appl_service | http_service ]
+type +'a ocaml
+type 'a non_ocaml
 
-(** Helper for typing OCaml services.
-    In some cases, you may need to write the return type of the
-    service manually. Instead of writing the full type of the service,
-    (which may be huge), add a type constraint for parameter [?rt] of service
-    creation functions
-    (like <<a_api subproject="server"|fun Eliom_service.Http.service>>),
-    using the following value.
+type ext
+type non_ext
 
-*)
-type 'rt rt
-val rt : 'rt rt
-
-(***** Static dir and actions do not depend on the type of pages ******)
+type ('r, 'e) rt =
+  | Ocaml  : ('r ocaml, ext) rt
+  | Http   : (http non_ocaml, ext) rt
+  | Appl   : (appl non_ocaml, non_ext) rt
+  (* FIXME! temporary to get current registration modules
+     working. REMOVE! *)
+  | Unsafe : ('a, ext) rt
 
 (** {2 Registration of services} *)
 
-
-(** Default module for creating services *)
-module Http : "sigs/eliom_service_with_external.mli"
-  subst type returnB := [> http_service ]
-  and type returnT := [< non_ocaml_service ]
-
-(** Module for creating services returning applications *)
-module App : "sigs/eliom_service.mli"
-  subst type returnB := [> appl_service ]
-  and type returnT := [< non_ocaml_service ]
-
-(** Module for creating services that return OCaml values *)
-module Ocaml : "sigs/eliom_service_with_external.mli"
-  subst type returnB := 'rt ocaml_service
-  and type returnT := 'rt ocaml_service
-
-(** Module for creating services without specifying the return type *)
-module Unsafe : "sigs/eliom_service_with_external.mli"
-  subst type returnB := 'returnB
-  and type returnT := 'returnT
-
+include Eliom_service_sigs.S_with_external
+  with type a_s := a_s
+   and type na_s := na_s
+   and type ('a, 'b, +'c, +'d, +'e, +'f, 'g, 'h, +'i, +'j) service :=
+     ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j) service
+   and type ('r, 'e) rt := ('r, 'e) rt
+   and type http := http
+   and type appl := appl
+   and type 'a ocaml := 'a ocaml
+   and type 'a non_ocaml := 'a non_ocaml
+   and type ext := ext
 
 (** {2 Static loading of Eliom modules} *)
 
@@ -231,7 +201,7 @@ val static_dir :
   (string list, unit, [> `Get],[> attached_kind], [> `Service ],
    [ `WithSuffix ],
    [ `One of string list ] param_name, unit, [> `Unregistrable ],
-   [> http_service ])
+   http non_ocaml)
     service
 
 (** Same as {!static_dir} but forcing https link. *)
@@ -240,7 +210,7 @@ val https_static_dir :
   (string list, unit, [> `Get], [> attached_kind], [> `Service ],
    [ `WithSuffix ],
    [ `One of string list ] param_name, unit, [> `Unregistrable ],
-   [> http_service ])
+   http non_ocaml)
     service
 
 (** Like [static_dir], but allows one to put GET parameters *)
@@ -251,7 +221,7 @@ val static_dir_with_params :
   ((string list * 'a), unit, [> `Get], [> attached_kind], [> `Service ],
    [ `WithSuffix ],
    [ `One of string list ] param_name *'an, unit, [> `Unregistrable ],
-   [> http_service ])
+   http non_ocaml)
     service
 
 (** Same as {!static_dir_with_params} but forcing https link. *)
@@ -262,7 +232,7 @@ val https_static_dir_with_params :
   ((string list * 'a), unit, [> `Get], [> attached_kind], [> `Service ],
    [ `WithSuffix ],
    [ `One of string list ] param_name *'an, unit, [> `Unregistrable ],
-   [> http_service ])
+   http non_ocaml)
     service
 
 
@@ -281,28 +251,28 @@ val https_static_dir_with_params :
 val void_coservice' :
   (unit, unit, [> `Get], [> non_attached_kind], [> `NonattachedCoservice],
    [ `WithoutSuffix ],
-   unit, unit, [> `Unregistrable ], [> non_ocaml_service ])
+   unit, unit, [> `Unregistrable ], _ non_ocaml)
   service
 
 (** Same as {!void_coservice'} but forcing https. *)
 val https_void_coservice' :
   (unit, unit, [> `Get], [> non_attached_kind], [> `NonattachedCoservice],
    [ `WithoutSuffix ],
-   unit, unit, [> `Unregistrable ], [> non_ocaml_service ])
+   unit, unit, [> `Unregistrable ], _ non_ocaml)
   service
 
 (** Same as {!void_coservice'} but keeps non attached GET parameters. *)
 val void_hidden_coservice' :
   (unit, unit, [> `Get], [> non_attached_kind], [> `NonattachedCoservice],
    [ `WithoutSuffix ],
-   unit, unit, [> `Unregistrable ], [> non_ocaml_service ])
+   unit, unit, [> `Unregistrable ], _ non_ocaml)
   service
 
 (** Same as {!void_hidden_coservice'} but forcing https. *)
 val https_void_hidden_coservice' :
   (unit, unit, [> `Get], [> non_attached_kind], [> `NonattachedCoservice],
    [ `WithoutSuffix ],
-   unit, unit, [> `Unregistrable ], [> non_ocaml_service ])
+   unit, unit, [> `Unregistrable ], _ non_ocaml)
   service
 
 

@@ -575,8 +575,9 @@ end = struct
         begin
           let hd_service =
             (* CCC ajouter possibilité d'https *)
-            Eliom_service.Http.post_coservice
-(*VVV Why is it attached? --Vincent *)
+            Eliom_service.post_coservice
+              (*VVV Why is it attached? --Vincent *)
+              ~rt:Eliom_service.Http
               ~fallback:(Eliom_common.force_lazy_site_value fallback_service)
               (*~name:"comet" (* CCC faut il mettre un nom ? *)*)
               ~post_params:Eliom_comet_base.comet_request_param
@@ -797,12 +798,13 @@ end = struct
       | Some `Site -> create_stateless ?name ~size stream
 
   let external_channel ?(history=1) ?(newest=false) ~prefix ~name () =
-    let service = Eliom_service.Http.external_post_service
-      ~prefix
-      ~path:comet_global_path
-      ~get_params:Eliom_parameter.unit
-      ~post_params:Eliom_comet_base.comet_request_param
-      ()
+    let service = Eliom_service.external_post_service
+        ~rt:Eliom_service.Http
+        ~prefix
+        ~path:comet_global_path
+        ~get_params:Eliom_parameter.unit
+        ~post_params:Eliom_comet_base.comet_request_param
+        ()
     in
     let last = if newest then None else Some history in
     { channel = External (Eliom_comet_base.Stateless_channel

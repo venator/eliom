@@ -100,8 +100,25 @@ type send_appl_content =
     then the link (or form or change_page) will expect application content.
 *)
 
+type http
+type appl
+
+type +'a ocaml
+type 'a non_ocaml
+
+type ext
+type non_ext
+
+type ('r, 'e) rt =
+  | Ocaml  : ('r ocaml, ext) rt
+  | Http   : (http non_ocaml, ext) rt
+  | Appl   : (appl non_ocaml, non_ext) rt
+  (* FIXME! temporary to get current registration modules
+     working. REMOVE! *)
+  | Unsafe : ('a, ext) rt
+
 (* 'return is the value returned by the service *)
-type ('get,'post,+'meth,+'attached,+'kind,+'tipo,'getnames,'postnames,+'registr,+'return) service = {
+type ('get,'post,+'meth,+'attached,+'kind,+'tipo,'getnames,'postnames,+'registr,+'rt) service = {
   pre_applied_parameters:
     (string * Eliommod_parameters.param) list String.Table.t
     (* non localized parameters *) *
@@ -489,8 +506,8 @@ let external_service_
 let external_post_service
     ~prefix
     ~path
-    ?rt
     ?keep_nl_params
+    ~rt
     ~get_params
     ~post_params
     () =
@@ -506,8 +523,8 @@ let external_post_service
 let external_put_service
     ~prefix
     ~path
-    ?rt
     ?keep_nl_params
+    ~rt
     ~get_params
     () =
   external_service_
@@ -522,8 +539,8 @@ let external_put_service
 let external_delete_service
     ~prefix
     ~path
-    ?rt
     ?keep_nl_params
+    ~rt
     ~get_params
     () =
   external_service_
@@ -538,8 +555,8 @@ let external_delete_service
 let external_service
     ~prefix
     ~path
-    ?rt
     ?keep_nl_params
+    ~rt
     ~get_params
     () =
   external_service_
@@ -637,13 +654,14 @@ let service_aux
         ()
 
 let service
-    ?rt
     ?(https = false)
     ~path
     ?keep_nl_params
     ?priority
+    ~rt
     ~get_params
     () =
+  ignore rt;
   let suffix = contains_suffix get_params in
   service_aux
     ~https
@@ -663,7 +681,6 @@ let default_csrf_scope = function
   | Some c -> (c :> [Eliom_common.user_scope])
 
 let coservice
-    ?rt
     ?name
     ?(csrf_safe = false)
     ?csrf_scope
@@ -671,10 +688,12 @@ let coservice
     ?max_use
     ?timeout
     ?(https = false)
+    ~rt
     ~fallback
     ?keep_nl_params
     ~get_params
     () =
+  ignore rt;
   let csrf_scope = default_csrf_scope csrf_scope in
   let `Attached k = fallback.info in
   (* (match Eliom_common.global_register_allowed () with
@@ -708,7 +727,6 @@ let coservice
 
 
 let coservice'
-    ?rt
     ?name
     ?(csrf_safe = false)
     ?csrf_scope
@@ -717,8 +735,10 @@ let coservice'
     ?timeout
     ?(https = false)
     ?(keep_nl_params = `Persistent)
+    ~rt
     ~get_params
     () =
+  ignore rt;
   let csrf_scope = default_csrf_scope csrf_scope in
   (* (match Eliom_common.global_register_allowed () with
   | Some _ -> Eliom_common.add_unregistered_na n;
@@ -839,34 +859,33 @@ let post_service_aux ~https ~fallback
    client_fun = None;
   }
 
-let post_service ?rt ?(https = false) ~fallback
+let post_service ?(https = false) ~rt ~fallback
     ?keep_nl_params ?priority ~post_params () =
-  (* POST service without POST parameters means
-     that the service will answer to a POST request only.
-    *)
+  (* POST service without POST parameters means that the service will
+     answer to a POST request only.  *)
+  ignore rt;
   let `Attached k1 = fallback.info in
   let path = k1.subpath in
   let sp = Eliom_common.get_sp_option () in
   let u = post_service_aux
-    ~https ~fallback ?keep_nl_params ?priority ~post_params in
+      ~https ~fallback ?keep_nl_params ?priority ~post_params in
   match sp with
   | None ->
-      (match Eliom_common.global_register_allowed () with
-      | Some get_current_sitedata ->
-          Eliom_common.add_unregistered (get_current_sitedata ()) path;
-          u
-      | None ->
-          if fallback.kind = `Service
-          then
-            raise (Eliom_common.Eliom_site_information_not_available
-                     "post_service")
-          else u)
+    (match Eliom_common.global_register_allowed () with
+     | Some get_current_sitedata ->
+       Eliom_common.add_unregistered (get_current_sitedata ()) path;
+       u
+     | None ->
+       if fallback.kind = `Service
+       then
+         raise (Eliom_common.Eliom_site_information_not_available
+                  "post_service")
+       else u)
   | _ -> u
 (* if the fallback is a coservice, do we get a coservice or a service? *)
 
 
 let post_coservice
-    ?rt
     ?name
     ?(csrf_safe = false)
     ?csrf_scope
@@ -874,10 +893,12 @@ let post_coservice
     ?max_use
     ?timeout
     ?(https = false)
+    ~rt
     ~fallback
     ?keep_nl_params
     ~post_params
     () =
+  ignore rt;
   let csrf_scope = default_csrf_scope csrf_scope in
   let `Attached k1 = fallback.info in
   (* (match Eliom_common.global_register_allowed () with
@@ -914,7 +935,6 @@ let post_coservice
 
 
 let post_coservice'
-    ?rt
     ?name
     ?(csrf_safe = false)
     ?csrf_scope
@@ -923,7 +943,8 @@ let post_coservice'
     ?(https = false)
     ?(keep_nl_params = `All)
     ?(keep_get_na_params = true)
-    ~post_params () =
+    ~rt ~post_params () =
+  ignore rt;
   let csrf_scope = default_csrf_scope csrf_scope in
   (* match Eliom_common.global_register_allowed () with
   | Some _ -> Eliom_common.add_unregistered None
@@ -1024,13 +1045,14 @@ let raw_post_data_service_aux ~getorpost
 (* Create a PUT service with [raw_post_data] as content, in the server *)
 
 let put_service
-    ?rt
     ?(https = false)
     ~path
     ?keep_nl_params
     ?priority
+    ~rt
     ~get_params
     () =
+  ignore rt;
   let suffix = contains_suffix get_params in
   raw_post_data_service_aux ~getorpost:`Put
     ~https
@@ -1043,7 +1065,6 @@ let put_service
     ~get_params
 
 let put_coservice
-    ?rt
     ?name
     ?(csrf_safe = false)
     ?csrf_scope
@@ -1051,10 +1072,12 @@ let put_coservice
     ?max_use
     ?timeout
     ?(https = false)
+    ~rt
     ~fallback
     ?keep_nl_params
     ~get_params
     () =
+  ignore rt;
   let csrf_scope = default_csrf_scope csrf_scope in
   let `Attached k = fallback.info in
   (* (match Eliom_common.global_register_allowed () with
@@ -1087,7 +1110,6 @@ let put_coservice
    Preapply services if you want fallbacks with GET parameters *)
 
 let put_coservice'
-    ?rt
     ?name
     ?(csrf_safe = false)
     ?csrf_scope
@@ -1096,8 +1118,8 @@ let put_coservice'
     ?timeout
     ?(https = false)
     ?(keep_nl_params = `Persistent)
-    ~get_params
-    () =
+    ~rt ~get_params () =
+  ignore rt;
   let csrf_scope = default_csrf_scope csrf_scope in
   (* (match Eliom_common.global_register_allowed () with
   | Some _ -> Eliom_common.add_unregistered_na n;
@@ -1142,13 +1164,14 @@ let put_coservice'
 (* Create a DELETE service with [raw_post_data] as content, in the server *)
 
 let delete_service
-    ?rt
     ?(https = false)
     ~path
     ?keep_nl_params
     ?priority
+    ~rt
     ~get_params
     () =
+  ignore rt;
   let suffix = contains_suffix get_params in
   raw_post_data_service_aux ~getorpost:`Delete
     ~https
@@ -1161,7 +1184,6 @@ let delete_service
     ~get_params
 
 let delete_coservice
-    ?rt
     ?name
     ?(csrf_safe = false)
     ?csrf_scope
@@ -1169,10 +1191,12 @@ let delete_coservice
     ?max_use
     ?timeout
     ?(https = false)
+    ~rt
     ~fallback
     ?keep_nl_params
     ~get_params
     () =
+  ignore rt;
   let csrf_scope = default_csrf_scope csrf_scope in
   let `Attached k = fallback.info in
   (* (match Eliom_common.global_register_allowed () with
@@ -1205,7 +1229,6 @@ let delete_coservice
    Preapply services if you want fallbacks with GET parameters *)
 
 let delete_coservice'
-    ?rt
     ?name
     ?(csrf_safe = false)
     ?csrf_scope
@@ -1214,8 +1237,8 @@ let delete_coservice'
     ?timeout
     ?(https = false)
     ?(keep_nl_params = `Persistent)
-    ~get_params
-    () =
+    ~rt ~get_params () =
+  ignore rt;
   let csrf_scope = default_csrf_scope csrf_scope in
   (* (match Eliom_common.global_register_allowed () with
   | Some _ -> Eliom_common.add_unregistered_na n;

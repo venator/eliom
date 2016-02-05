@@ -29,9 +29,8 @@ let code_of_code_option = function
   | None -> 200
   | Some c -> c
 
-type non_ocaml_service = Eliom_service.non_ocaml_service
-type appl_service = Eliom_service.appl_service
-type http_service = Eliom_service.http_service
+type appl_service = Eliom_service.appl Eliom_service.non_ocaml
+type http_service = Eliom_service.http Eliom_service.non_ocaml
 
 (******************************************************************************)
 (* Send return types                                                          *)
@@ -1389,7 +1388,8 @@ module Ocaml = struct
       ~(service : ('get, 'post, _, _,
                    [< internal_service_kind ],
                    [< suff ], 'gn, 'pn, [ `Registrable ],
-                   'return Eliom_service.ocaml_service) service)
+                   'return Eliom_service.ocaml)
+            Eliom_service.service)
       ?(error_handler : ((string * exn) list -> 'return Lwt.t) option)
       (f : ('get -> 'post -> 'return Lwt.t)) =
     M.register
@@ -1863,12 +1863,12 @@ module Eliom_appl_reg_make_param
   open Eliom_content.Html5.D
   open Html5_types
 
-  type appl
+  type app_id
 
   type page = html elt
   type options = appl_service_options
   type return = appl_service
-  type result = appl application_content kind
+  type result = app_id application_content kind
 
   let result_of_http_result = Result_types.cast_result
 
@@ -2130,27 +2130,27 @@ module type ELIOM_APPL = sig
     ?defer:bool -> ?async:bool -> unit -> [> `Script ] Eliom_content.Html5.elt
   val application_name : string
   val is_initial_request : unit -> bool
-  type appl
+  type app_id
   include "sigs/eliom_reg.mli"
     subst type page    := Html5_types.html Eliom_content.Html5.elt
       and type options := appl_service_options
-      and type return  := appl_service
-      and type returnB := [> appl_service ]
-      and type returnT := [< non_ocaml_service ]
-      and type result  := appl application_content kind
-  val typed_name : appl application_name
+      and type return  := Eliom_service.appl non_ocaml
+      and type returnB := Eliom_service.appl non_ocaml
+      and type returnT := Eliom_service.appl non_ocaml
+      and type result  := app_id application_content kind
+  val typed_name : app_id application_name
 end
 
 module App (Appl_params : APPL_PARAMS) : ELIOM_APPL = struct
 
-  module Eliom_appl_reg_param =
+  module P =
     Eliom_appl_reg_make_param
       (Ocsigen_senders.Make_XML_Content(Xml)(Eliom_content.Html5.D))
       (Appl_params)
 
-  type appl = Eliom_appl_reg_param.appl
+  type app_id = P.app_id
 
-  module Eliom_appl_registration = Eliom_mkreg.MakeRegister(Eliom_appl_reg_param)
+  module Eliom_appl_registration = Eliom_mkreg.MakeRegister(P)
 
   include Eliom_appl_registration
 
@@ -2161,9 +2161,9 @@ module App (Appl_params : APPL_PARAMS) : ELIOM_APPL = struct
   *)
   let application_name = Appl_params.application_name
   let typed_name = Appl_params.application_name
-  let is_initial_request = Eliom_appl_reg_param.is_initial_request
+  let is_initial_request = P.is_initial_request
 
-  let application_script = Eliom_appl_reg_param.application_script
+  let application_script = P.application_script
 
   let set_client_fun = Eliom_content.set_client_fun
 
@@ -2183,7 +2183,7 @@ module Eliom_tmpl_reg_make_param
   type page = Tmpl_param.t
   type options = appl_service_options
   type return = appl_service
-  type result = Appl.appl application_content kind
+  type result = Appl.app_id application_content kind
 
   let result_of_http_result = Result_types.cast_result
 
