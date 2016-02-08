@@ -35,11 +35,12 @@ let string_prefix s1 s2 =
     s1 = String.sub s2 0 (String.length s1)
 
 type ('a, 'b, 'c) one_page =
-    (unit, unit, 'a, attached, service_kind,
-     [ `WithoutSuffix ],
-     unit, unit,
-     'b, 'c Eliom_service.non_ocaml) service
-    constraint 'a = [< Eliom_service.service_method ]
+  (unit, unit, 'a, attached,
+   [`Co | `Non_co], [`Ext | `Non_ext],
+   [ `WithoutSuffix ],
+   unit, unit,
+   'b, 'c Eliom_service.non_ocaml) service
+constraint 'a = [< Eliom_service.service_method ]
 
 type ('a, 'b, 'c, 'd) hierarchical_site_item =
   | Disabled

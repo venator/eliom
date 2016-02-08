@@ -27,18 +27,9 @@ type suff =
   [ `WithSuffix
   | `WithoutSuffix ]
 
+type co_flag = [ `Co | `Non_co ]
 
-type internal_attached_service_kind =
-  [ `Service
-  | `AttachedCoservice ]
-
-type internal_service_kind =
-  [ internal_attached_service_kind
-  | `NonattachedCoservice ]
-
-type service_kind =
-  [ internal_service_kind
-  | `External ]
+type ext_flag = [ `Ext | `Non_ext ]
 
 type service_method =
   [ `Get
@@ -109,6 +100,18 @@ type 'a non_ocaml
 type ext
 type non_ext
 
+type internal_attached_service_kind =
+  [ `Service
+  | `AttachedCoservice ]
+
+type internal_service_kind =
+  [ internal_attached_service_kind
+  | `NonattachedCoservice ]
+
+type service_kind =
+  [ internal_service_kind
+  | `External ]
+
 type ('r, 'e) rt =
   | Ocaml  : ('r ocaml, ext) rt
   | Http   : (http non_ocaml, ext) rt
@@ -118,7 +121,8 @@ type ('r, 'e) rt =
   | Unsafe : ('a, ext) rt
 
 (* 'return is the value returned by the service *)
-type ('get,'post,+'meth,+'attached,+'kind,+'tipo,'getnames,'postnames,+'registr,+'rt) service = {
+type ('get, 'post, +'meth, +'attached, +'co, +'ext,
+      +'tipo, 'getnames, 'postnames, +'registr, +'rt) service = {
   pre_applied_parameters:
     (string * Eliommod_parameters.param) list String.Table.t
     (* non localized parameters *) *
@@ -144,12 +148,15 @@ type ('get,'post,+'meth,+'attached,+'kind,+'tipo,'getnames,'postnames,+'registr,
       Eliom_lib.client_value option;
 
   service_mark :
-    (unit,unit,service_method,attached,service_kind,suff,unit,unit,registrable,unit)
+    (unit, unit, service_method,
+     attached, co_flag, ext_flag,
+     suff, unit, unit, registrable, unit)
       service Eliom_common.wrapper;
 }
   constraint 'meth = [< service_method ]
   constraint 'attached = [< attached]
-  constraint 'kind = [< service_kind ]
+  constraint 'co = [< co_flag ]
+  constraint 'ext = [< ext_flag ]
   constraint 'tipo = [< suff ]
   constraint 'registr = [< registrable ]
 
@@ -571,8 +578,8 @@ let external_service
 
 
 let untype_service_ s =
-  (s : ('get, 'post, 'meth, 'attached, 'kind, 'tipo, 'getnames, 'postnames,'register,'return) service
-   :> ('get, 'post, 'meth, 'attached, 'kind, 'tipo, 'getnames, 'postnames,'register,'http) service)
+  (s : ('get, 'post, 'meth, 'attached, 'co, 'ext, 'tipo, 'getnames, 'postnames,'register,'return) service
+   :> ('get, 'post, 'meth, 'attached, 'co, 'ext, 'tipo, 'getnames, 'postnames,'register,'http) service)
 
 let eliom_appl_answer_content_type = "application/x-eliom"
 
@@ -779,9 +786,15 @@ let coservice'
 
 
 let attach_coservice' :
-  fallback:(unit, unit, [<`Get], [< attached_kind], [< `Service | `AttachedCoservice ], [< suff ], unit, unit, 'rg1, 'return1) service ->
-  service: ('get, 'post, 'gp, [< non_attached_kind ], [< `NonattachedCoservice ], [< `WithoutSuffix] as 'sf, 'gn, 'pn, 'rg2, 'return) service ->
-  ('get, 'post, 'gp, [> attached_kind],  [> `AttachedCoservice ], 'sf, 'gn, 'pn, [< registrable > `Unregistrable ], 'return) service = fun ~fallback ~service ->
+  fallback:
+  (unit, unit, [<`Get], [< attached_kind], _, [< `Non_ext],
+   [< suff ], unit, unit, 'rg1, 'return1) service ->
+  service:
+  ('get, 'post, 'gp, [< non_attached_kind ], [< `Co ], [< `Non_ext],
+   [< `WithoutSuffix] as 'sf, 'gn, 'pn, 'rg2, 'return) service ->
+  ('get, 'post, 'gp, [> attached_kind], [> `Co ], [> `Non_ext],
+   'sf, 'gn, 'pn, [< registrable > `Unregistrable ], 'return) service =
+  fun ~fallback ~service ->
   let `Nonattached {na_name} = service.info in
   let `Attached fallbackkind = fallback.info in
   let open Eliom_common in

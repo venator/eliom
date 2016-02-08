@@ -60,12 +60,14 @@ let clone_exn (t,u) s =
       raise_lwt e)
 
 type 'a callable_bus_service =
-    (unit, 'a list, Eliom_service.service_method, Eliom_service.attached, Eliom_service.service_kind,
-     [ `WithoutSuffix ], unit,
-     [ `One of 'a list Eliom_parameter.ocaml ]
-       Eliom_parameter.param_name, [ `Registrable ],
-     Eliom_registration.Action.return)
-      Eliom_service.service
+  (unit, 'a list, Eliom_service.service_method,
+   Eliom_service.attached,
+   [`Co | `Non_co], [`Ext | `Non_ext],
+   [ `WithoutSuffix ], unit,
+   [ `One of 'a list Eliom_parameter.ocaml ]
+     Eliom_parameter.param_name, [ `Registrable ],
+   Eliom_registration.Action.return)
+    Eliom_service.service
 
 let create service channel waiter =
   let write x =

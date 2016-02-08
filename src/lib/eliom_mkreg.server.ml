@@ -257,10 +257,10 @@ let register_aux pages
 				  ~absolute:true
 				  ~service:
 				  (service :
-				     ('a, 'b, [< service_method],[<attached],[< Eliom_service.internal_service_kind ],
+				     ('a, 'b, [< service_method],[<attached], [< `Co | `Non_co ], [< `Non_ext ],
 				      [< Eliom_service.suff ], 'c, 'd, [ `Registrable ],
 				      'return) Eliom_service.service :>
-				     ('a, 'b, [< service_method],[<attached],Eliom_service.service_kind,
+				     ('a, 'b, [< service_method],[<attached], _, _,
 				      [< Eliom_service.suff ], 'c, 'd,
 				      [< Eliom_service.registrable ], 'return)
 				     Eliom_service.service)
@@ -632,10 +632,10 @@ let register_coservice pages
     ?timeout
     ?https
     ~(fallback: (unit, unit, [< Eliom_service.service_method > `Get ],
-                     [> Eliom_service.attached_kind ],
-                     [< Eliom_service.service_kind > `Service ],
-                     [ `WithoutSuffix ], unit, unit,
-                     [< Eliom_service.registrable ], 'returnT)
+                 [> Eliom_service.attached_kind ],
+                 _, _,
+                 [ `WithoutSuffix ], unit, unit,
+                 [< Eliom_service.registrable ], 'returnT)
           Eliom_service.service)
     ~rt
     ~get_params

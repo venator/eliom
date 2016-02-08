@@ -45,7 +45,7 @@ val register :
   ?headers: Http_headers.t ->
   ?secure_session:bool ->
   service:('get, 'post, [< service_method], [< attached],
-           [< internal_service_kind ],
+           _, [< `Non_ext ],
            [< suff ], 'gn, 'pn, [ `Registrable ], returnT) service ->
   ?error_handler:((string * exn) list -> page Lwt.t) ->
   ('get -> 'post -> page Lwt.t) ->
@@ -67,7 +67,8 @@ val register_service :
   get_params:('get, [< suff ] as 'tipo, 'gn) params_type ->
   ?error_handler:((string * exn) list -> page Lwt.t) ->
   ('get -> unit -> page Lwt.t) ->
-  ('get, unit, [> `Get], [> Eliom_service.attached_kind], [> `Service ],
+  ('get, unit, [> `Get], [> Eliom_service.attached_kind],
+   [> `Non_co ], [> `Non_ext ],
    'tipo, 'gn, unit,
    [> `Registrable ], returnB) service
 
@@ -87,7 +88,8 @@ val register_coservice :
   ?max_use:int ->
   ?timeout:float ->
   ?https:bool ->
-  fallback:(unit, unit, [`Get], [Eliom_service.attached_kind], [`Service ],
+  fallback:(unit, unit, [`Get], [Eliom_service.attached_kind],
+            [ `Non_co ], [ `Non_ext ],
             [ `WithoutSuffix ] as 'tipo,
             unit, unit, [< registrable ], returnT)
     service ->
@@ -95,7 +97,9 @@ val register_coservice :
     ('get, [`WithoutSuffix], 'gn) params_type ->
   ?error_handler:((string * exn) list -> page Lwt.t) ->
   ('get -> unit -> page Lwt.t) ->
-  ('get, unit,[> `Get], [> Eliom_service.attached_kind], [> `AttachedCoservice ],
+  ('get, unit,[> `Get],
+   [> Eliom_service.attached_kind],
+   [> `Co ], [> `Non_ext ],
    'tipo, 'gn, unit,
    [> `Registrable ], returnB)
     service
@@ -121,7 +125,9 @@ val register_coservice' :
     ('get, [`WithoutSuffix] as 'tipo, 'gn) params_type ->
   ?error_handler:((string * exn) list -> page Lwt.t) ->
   ('get -> unit -> page Lwt.t) ->
-  ('get, unit,[> `Get], [> Eliom_service.non_attached_kind], [> `NonattachedCoservice],
+  ('get, unit,[> `Get],
+   [> Eliom_service.non_attached_kind],
+   [> `Co ], [> `Non_ext ],
    'tipo, 'gn, unit, [> `Registrable ], returnB)
     service
 
@@ -137,14 +143,17 @@ val register_post_service :
   ?secure_session:bool ->
   ?https:bool ->
   ?priority:int ->
-  fallback:('get, unit, [`Get], [Eliom_service.attached_kind], [`AttachedCoservice | `Service] as 'kind,
+  fallback:('get, unit, [`Get],
+            [Eliom_service.attached_kind],
+            'co, [`Non_ext],
             [< suff ] as 'tipo, 'gn,
             unit, [< `Registrable ], returnT)
     service ->
   post_params:('post, [ `WithoutSuffix ], 'pn) params_type ->
   ?error_handler:((string * exn) list -> page Lwt.t) ->
   ('get -> 'post -> page Lwt.t) ->
-  ('get, 'post, [> `Post], [> Eliom_service.attached_kind], 'kind,
+  ('get, 'post, [> `Post], [> Eliom_service.attached_kind], 'co,
+   [`Non_ext],
    'tipo, 'gn, 'pn, [> `Registrable ], returnB)
     service
 
@@ -164,14 +173,17 @@ val register_post_coservice :
   ?max_use:int ->
   ?timeout:float ->
   ?https:bool ->
-  fallback:('get, unit , [<`Get],[<Eliom_service.attached_kind],[< `AttachedCoservice | `Service ],
+  fallback:('get, unit , [<`Get],[<Eliom_service.attached_kind],
+            _, [< `Non_ext ],
             [< suff ] as 'tipo,
             'gn, unit, [< `Registrable ], returnT)
     service ->
   post_params:('post, [ `WithoutSuffix ], 'pn) params_type ->
   ?error_handler:((string * exn) list -> page Lwt.t) ->
   ('get -> 'post -> page Lwt.t) ->
-  ('get, 'post,[>`Post],[> Eliom_service.attached_kind],[> `AttachedCoservice ],
+  ('get, 'post, [>`Post],
+   [> Eliom_service.attached_kind ],
+   [> `Co ], [> `Non_ext ],
    'tipo, 'gn, 'pn, [> `Registrable ], returnB)
     service
 
@@ -195,7 +207,9 @@ val register_post_coservice' :
   post_params:('post, [ `WithoutSuffix ], 'pn) params_type ->
   ?error_handler:((string * exn) list -> page Lwt.t) ->
   (unit -> 'post -> page Lwt.t) ->
-  (unit, 'post, [>`Post],[> Eliom_service.non_attached_kind],[> `NonattachedCoservice],
+  (unit, 'post, [>`Post],
+   [> Eliom_service.non_attached_kind],
+   [> `Co ], [> `Non_ext ],
    [ `WithoutSuffix ], unit, 'pn,
    [> `Registrable ], returnB)
     service
@@ -215,7 +229,7 @@ val register_put_service :
   get_params:('get, [< suff ] as 'tipo, 'gn) params_type ->
   ?error_handler:((string * exn) list -> page Lwt.t) ->
   ('get -> raw_post_data -> page Lwt.t) ->
-  ('get, raw_post_data, [> `Put], [> Eliom_service.attached_kind],[> `Service ],
+  ('get, raw_post_data, [> `Put], [> Eliom_service.attached_kind],[> `Non_co ], [> `Non_ext ],
    'tipo, 'gn, no_param_name,
    [> `Registrable ], returnB) service
 
@@ -235,7 +249,9 @@ val register_put_coservice :
   ?max_use:int ->
   ?timeout:float ->
   ?https:bool ->
-  fallback:(unit, raw_post_data,[`Put],[ Eliom_service.attached_kind],[ `Service ],
+  fallback:(unit, raw_post_data,
+            [`Put], [ Eliom_service.attached_kind],
+            [ `Non_co ], [ `Non_ext ],
             [ `WithoutSuffix ] as 'tipo,
             unit, no_param_name, [< registrable ], returnT)
     service ->
@@ -243,7 +259,8 @@ val register_put_coservice :
     ('get, [`WithoutSuffix], 'gn) params_type ->
   ?error_handler:((string * exn) list -> page Lwt.t) ->
   ('get -> raw_post_data -> page Lwt.t) ->
-  ('get, raw_post_data, [> `Put], [> Eliom_service.attached_kind],[> `AttachedCoservice ],
+  ('get, raw_post_data, [> `Put], [> Eliom_service.attached_kind],
+   [> `Co ], [> `Non_ext ],
    'tipo, 'gn, no_param_name,
    [> `Registrable ], returnB)
     service
@@ -268,7 +285,9 @@ val register_put_coservice' :
     ('get, [`WithoutSuffix] as 'tipo, 'gn) params_type ->
   ?error_handler:((string * exn) list -> page Lwt.t) ->
   ('get -> raw_post_data -> page Lwt.t) ->
-  ('get, raw_post_data, [> `Put],[> Eliom_service.non_attached_kind],[> `NonattachedCoservice],
+  ('get, raw_post_data, [> `Put],
+   [> Eliom_service.non_attached_kind],
+   [> `Co ], [> `Non_ext ],
    'tipo, 'gn, no_param_name, [> `Registrable ], returnB)
     service
 
@@ -287,7 +306,8 @@ val register_delete_service :
   get_params:('get, [< suff ] as 'tipo, 'gn) params_type ->
   ?error_handler:((string * exn) list -> page Lwt.t) ->
   ('get -> raw_post_data -> page Lwt.t) ->
-  ('get, raw_post_data, [> `Delete], [> Eliom_service.attached_kind],[> `Service ],
+  ('get, raw_post_data, [> `Delete], [> Eliom_service.attached_kind],
+   [> `Non_co ], [> `Non_ext ],
    'tipo, 'gn, no_param_name,
    [> `Registrable ], returnB) service
 
@@ -307,15 +327,20 @@ val register_delete_coservice :
   ?max_use:int ->
   ?timeout:float ->
   ?https:bool ->
-  fallback:(unit, raw_post_data,[`Delete],[ Eliom_service.attached_kind],[ `Service ],
-            [ `WithoutSuffix ] as 'tipo,
-            unit, no_param_name, [< registrable ], returnT)
+  fallback:
+    (unit, raw_post_data, [`Delete],
+     [ Eliom_service.attached_kind],
+     [ `Non_co ], [ `Non_ext ],
+     [ `WithoutSuffix ] as 'tipo,
+     unit, no_param_name, [< registrable ], returnT)
     service ->
   get_params:
     ('get, [`WithoutSuffix], 'gn) params_type ->
   ?error_handler:((string * exn) list -> page Lwt.t) ->
   ('get -> raw_post_data -> page Lwt.t) ->
-  ('get, raw_post_data, [> `Delete], [> Eliom_service.attached_kind], [> `AttachedCoservice ],
+  ('get, raw_post_data, [> `Delete],
+   [> Eliom_service.attached_kind],
+   [> `Co ], [> `Non_ext ],
    'tipo, 'gn, no_param_name,
    [> `Registrable ], returnB)
     service
@@ -340,7 +365,9 @@ val register_delete_coservice' :
     ('get, [`WithoutSuffix] as 'tipo, 'gn) params_type ->
   ?error_handler:((string * exn) list -> page Lwt.t) ->
   ('get -> raw_post_data -> page Lwt.t) ->
-  ('get, raw_post_data, [> `Delete], [> Eliom_service.non_attached_kind ], [> `NonattachedCoservice],
+  ('get, raw_post_data, [> `Delete],
+   [> Eliom_service.non_attached_kind ],
+   [> `Co ], [> `Non_ext ],
    'tipo, 'gn, no_param_name, [> `Registrable ], returnB)
     service
 

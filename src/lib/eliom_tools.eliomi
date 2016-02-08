@@ -29,10 +29,11 @@ open Eliom_service
 (** Restriction of {!type:Eliom_service.service} to services without
     parameters that do not returns a marshalled OCaml value. *)
 type ('a, 'b, 'c) one_page =
-    (unit, unit,'a, attached, service_kind,
-     [ `WithoutSuffix ],
-     unit, unit,
-     'b, 'c Eliom_service.non_ocaml) service
+  (unit, unit,'a, attached,
+   [ `Co | `Non_co ], [ `Ext | `Non_ext ],
+   [ `WithoutSuffix ],
+   unit, unit,
+   'b, 'c Eliom_service.non_ocaml) service
 
 (** Hierarchical sites description. This is is a pair [(main page,
     subpages list)]. Each subpage is defined by the text to be

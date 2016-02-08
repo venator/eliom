@@ -177,7 +177,7 @@ module type ELIOM_APPL = sig
   (** Attach a client function to a service,
       that will be used instead of calling the server to generate the page. *)
   val set_client_fun :
-    ('a, 'b, 'meth, 'att, 'c, 'd, 'e, 'f, 'g, 'return) Eliom_service.service ->
+    ('a, 'b, _, _, _, _, _, _, _, _, _) Eliom_service.service ->
     ('a -> 'b -> [`Html] Eliom_content.Html5.elt Lwt.t) client_value ->
     unit
 
@@ -353,12 +353,15 @@ module Unit : "sigs/eliom_reg.mli"
     - [`TemporaryRedirect] to return [307 Temporary Redirect].
 
 *)
-module Redirection : "sigs/eliom_reg_alpha_return.mli"
+module Redirection :
+"sigs/eliom_reg_alpha_return.mli"
   subst type page :=
-      (unit, unit, Eliom_service.get_service_kind, Eliom_service.attached, Eliom_service.service_kind,
-       [ `WithoutSuffix ],
-       unit, unit, Eliom_service.registrable, 'b)
-      Eliom_service.service
+               (unit, unit, Eliom_service.get_service_kind,
+                Eliom_service.attached,
+                [ `Co | `Non_co ], [ `Ext | `Non_ext ],
+                [ `WithoutSuffix ],
+                unit, unit, Eliom_service.registrable, 'b)
+                 Eliom_service.service
   and type options := [ `MovedPermanently
 		      | `Found
 		      | `SeeOther

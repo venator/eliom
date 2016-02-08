@@ -45,7 +45,7 @@ val change_page :
   ?https:bool ->
   service:('a, 'b,[< Eliom_service.service_method ],
            [< Eliom_service.attached ],
-           [< Eliom_service.service_kind ],
+           [< `Co | `Non_co ], [ `Ext | `Non_ext ],
            [< `WithSuffix | `WithoutSuffix ], 'd, 'e,
            [< Eliom_service.registrable ],
            _ Eliom_service.non_ocaml)
@@ -77,7 +77,7 @@ val call_ocaml_service :
   service:('a, 'b,
            [< Eliom_service.service_method ],
            [< Eliom_service.attached ],
-           [< Eliom_service.service_kind ],
+           [< `Co | `Non_co ], [< `Ext | `Non_ext ],
            [< `WithSuffix | `WithoutSuffix ], 'd, 'e,
            [< Eliom_service.registrable ], 'return Eliom_service.ocaml)
     Eliom_service.service ->
@@ -103,7 +103,7 @@ val exit_to :
   service:('a, 'b,
            [< Eliom_service.service_method ],
            [< Eliom_service.attached ],
-           [< Eliom_service.service_kind ],
+           [< `Co | `Non_co ], [< `Ext | `Non_ext ],
            [< `WithSuffix | `WithoutSuffix ], 'd, 'e,
            [< Eliom_service.registrable ],
            _ Eliom_service.non_ocaml)
@@ -126,7 +126,7 @@ val window_open :
   service:('a, unit,
            [< Eliom_service.get_service_kind ],
            [< Eliom_service.attached ],
-           [< Eliom_service.service_kind ],
+           [< `Co | `Non_co ], [< `Ext | `Non_ext ],
            [< `WithSuffix | `WithoutSuffix ], _, unit,
            [< Eliom_service.registrable ], _)
           Eliom_service.service ->
@@ -147,7 +147,7 @@ val change_url :
   ?https:bool ->
   service:('get, unit, [< Eliom_service.get_service_kind ],
            [< Eliom_service.attached ],
-           [< Eliom_service.service_kind ],
+           [< `Co | `Non_co ], [< `Ext | `Non_ext ],
            [< Eliom_service.suff ], 'gn, unit,
            [< Eliom_service.registrable ], 'return) Eliom_service.service ->
   ?hostname:string ->
@@ -166,7 +166,7 @@ val call_service :
   service:('a, 'b,
            [< Eliom_service.service_method ],
            [< Eliom_service.attached],
-           [< Eliom_service.service_kind],
+           [< `Co | `Non_co ], [< `Ext | `Non_ext ],
            [< `WithSuffix | `WithoutSuffix ], 'd, 'e,
            [< Eliom_service.registrable ], 'return)
           Eliom_service.service ->

@@ -1386,7 +1386,7 @@ module Ocaml = struct
       ?headers
       ?secure_session
       ~(service : ('get, 'post, _, _,
-                   [< internal_service_kind ],
+                   _, [< `Non_ext ],
                    [< suff ], 'gn, 'pn, [ `Registrable ],
                    'return Eliom_service.ocaml)
             Eliom_service.service)
@@ -2123,7 +2123,7 @@ module Eliom_appl_reg_make_param
 
 module type ELIOM_APPL = sig
   val set_client_fun :
-    ('a, 'b, 'meth, 'att, 'c, 'd, 'e, 'f, 'g, 'return) Eliom_service.service ->
+    ('a, 'b, _, _, _, _, _, _, _, _, _) Eliom_service.service ->
     ('a -> 'b -> [`Html] Eliom_content.Html5.elt Lwt.t) client_value ->
     unit
   val application_script :
@@ -2298,8 +2298,9 @@ module String_redirection = Eliom_mkreg.MakeRegister(String_redir_reg_base)
 
 module Redir_reg_base = struct
 
-  type ('a, 'b) page =
-      (unit, unit, Eliom_service.get_service_kind , Eliom_service.attached, Eliom_service.service_kind,
+    type ('a, 'b) page =
+      (unit, unit, Eliom_service.get_service_kind , Eliom_service.attached,
+       [ `Co | `Non_co ], [ `Ext | `Non_ext ],
        [ `WithoutSuffix ],
        unit, unit, Eliom_service.registrable, 'b)
         Eliom_service.service

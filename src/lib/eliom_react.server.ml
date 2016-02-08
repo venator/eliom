@@ -102,7 +102,7 @@ struct
            'a,
            [`Post],
            [ Eliom_service.non_attached_kind],
-           [ `NonattachedCoservice],
+           [ `Co ], [ `Non_ext ],
            [ `WithoutSuffix ],
            unit,
            [ `One of 'a Eliom_parameter.ocaml ] Eliom_parameter.param_name,
