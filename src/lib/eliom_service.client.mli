@@ -26,31 +26,6 @@ open Eliom_lib
 
 (** {2 Type definitions for services} *)
 
-(** {3 Services kind} *)
-
-(** The type [service_kind] describe all four kind of services:
-    - external (attached) services
-    - (internal) attached services
-    - (internal) attached coservices
-    - (internal) non-attached coservices
-*)
-
-(** An internal attached service could either be a [`Service] or a [`AttachedCoservice]. *)
-type internal_attached_service_kind =
-  [ `Service
-  | `AttachedCoservice ]
-
-(** An internal service could either be an internal attached service or a [`NonattachedCoservice]. *)
-type internal_service_kind =
-  [ internal_attached_service_kind
-  | `NonattachedCoservice ]
-
-(** An attached service could either be an internal Eliom service or an
-    abstraction for an [`External] service. *)
-type service_kind =
-  [ internal_service_kind
-  | `External ]
-
 (** {3 Attached or Non-attached} *)
 
 (** The abstract type for attached service representation. *)
@@ -363,7 +338,7 @@ val get_get_or_post :
   ('a, 'b,[<service_method] as 'c,[< attached], _, _, 'd, 'e, 'f, 'g, 'h) service -> 'c
 
 val get_info_ : (_,_,_,'attached,_,_,_,_,_,_,_) service -> 'attached
-val get_kind_ : (_, _, _, _, _, _, _, _, _, _, _) service -> service_kind
+val is_external : (_, _, _, _, _, _, _, _, _, _, _) service -> bool
 val get_pre_applied_parameters_ : (_, _, _, _, _, _, _, _, _, _, _) service ->
   (string * Eliommod_parameters.param) list String.Table.t *
   (string * Eliommod_parameters.param) list

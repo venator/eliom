@@ -208,8 +208,7 @@ let make_uri_components_ (* does not take into account getparams *)
 
       let uri =
         let suff= None in
-        if (get_kind_ service) = `External
-        then
+        if is_external service then
           (get_prefix_ attser)^
             "/"^  (* we add the "/" even if there is no prefix,
                      because we should do absolute links in that case *)
@@ -653,9 +652,10 @@ let make_cookies_info (https, service) =
       =
     match Eliom_service.get_info_ service with
       | `Attached attser ->
-        if (Eliom_service.get_kind_ service) = `External
-        then None
-        else Some (Eliom_service.get_full_path_ attser)
+        if is_external service then
+          None
+        else
+          Some (Eliom_service.get_full_path_ attser)
       | `Nonattached naser ->
         Some (Eliom_request_info.get_csp_original_full_path ())
   in

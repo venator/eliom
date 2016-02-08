@@ -62,7 +62,8 @@ type na_s = {
           (31/12/2007 - experimental -
           WAS: 'a, but may be removed (was not used))
        *)
-}
+  }
+
 type attached_kind = [ `Attached of a_s ]
 type non_attached_kind = [ `Nonattached of na_s ]
 type attached = [ attached_kind | non_attached_kind ]
@@ -100,16 +101,10 @@ type 'a non_ocaml
 type ext
 type non_ext
 
-type internal_attached_service_kind =
-  [ `Service
-  | `AttachedCoservice ]
-
-type internal_service_kind =
-  [ internal_attached_service_kind
-  | `NonattachedCoservice ]
-
 type service_kind =
-  [ internal_service_kind
+  [ `Service
+  | `AttachedCoservice
+  | `NonattachedCoservice
   | `External ]
 
 type ('r, 'e) rt =
