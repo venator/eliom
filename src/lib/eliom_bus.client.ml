@@ -59,9 +59,9 @@ let clone_exn (t,u) s =
         | _ -> ());
       raise_lwt e)
 
-type 'a callable_bus_service =
+type ('a, 'att) callable_bus_service =
   (unit, 'a list, Eliom_service.service_method,
-   Eliom_service.attached,
+   'att,
    [`Co | `Non_co], [`Ext | `Non_ext],
    [ `WithoutSuffix ], unit,
    [ `One of 'a list Eliom_parameter.ocaml ]
@@ -73,7 +73,7 @@ let create service channel waiter =
   let write x =
     try_lwt
       lwt _ = Eliom_client.call_service
-        ~service:(service:>'a callable_bus_service) () x in
+                ~service:(service:> ('a, _) callable_bus_service) () x in
       Lwt.return ()
     with
       | Eliom_request.Failed_request 204 -> Lwt.return ()

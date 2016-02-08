@@ -312,11 +312,11 @@ let make_uri_components_ (* does not take into account getparams *)
     in
     (beg, params, fragment)
 
-let make_uri_components
+let make_uri_components (type att)
     ?absolute
     ?absolute_path
     ?https
-    ~service
+    ~(service : (_, _, _, att, _, _, _, _, _, _, _) Eliom_service.service)
     ?hostname
     ?port
     ?fragment
@@ -394,11 +394,12 @@ let make_string_uri
 let make_string_uri_ = make_string_uri
 
 
-let make_post_uri_components_ (* do not take into account postparams *)
+let make_post_uri_components_ (type att)
+    (* do not take into account postparams *)
     ?(absolute = false)
     ?(absolute_path = false)
     ?https
-    ~service
+    ~(service : (_, _, _, att, _, _, _, _, _, _, _) Eliom_service.service)
     ?hostname
     ?port
     ?fragment
@@ -407,8 +408,8 @@ let make_post_uri_components_ (* do not take into account postparams *)
     ?keep_get_na_params
     getparams
     () =
-  match get_info_ service with
-  | `Attached attser ->
+  match get_info service with
+  | Attached attser ->
     let (uri, getparams, fragment), getname =
       let getname = get_get_name_ attser in
       match getname with
@@ -477,7 +478,7 @@ let make_post_uri_components_ (* do not take into account postparams *)
      Eliommod_parameters.inject_param_list postparams)
 
 
-  | `Nonattached naser ->
+  | Nonattached naser ->
 
     let sp = Eliom_common.get_sp () in
     let nl_params = Eliom_parameter.table_of_nl_params_set nl_params in

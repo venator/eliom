@@ -28,7 +28,6 @@ let server = {
     "eliom_reference";
     "eliom_registration";
     "eliom_request_info";
-    "eliom_tools";
     "eliom_service";
     "eliom_state";
     "eliom_types";
@@ -89,7 +88,6 @@ let client = {
     "eliom_shared";
     "eliom_cscache";
     "eliom_registration";
-    "eliom_tools";
     "eliom_service";
     "eliom_types";
     "eliom_unwrap";

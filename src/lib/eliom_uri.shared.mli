@@ -220,7 +220,7 @@ val make_proto_prefix :
 
 val make_cookies_info :
   bool option *
-    ('a, 'b, _, [< attached], _, _,
+    ('a, 'b, _, _, _, _,
      [< `WithSuffix | `WithoutSuffix ], 'e, 'f, 'g, 'h)
       Eliom_service.service ->
   (bool * Url.path) option

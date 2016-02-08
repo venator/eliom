@@ -44,7 +44,7 @@ val change_page :
   ?absolute_path:bool ->
   ?https:bool ->
   service:('a, 'b,[< Eliom_service.service_method ],
-           [< Eliom_service.attached ],
+           _,
            [< `Co | `Non_co ], [ `Ext | `Non_ext ],
            [< `WithSuffix | `WithoutSuffix ], 'd, 'e,
            [< Eliom_service.registrable ],
@@ -76,7 +76,7 @@ val call_ocaml_service :
   ?https:bool ->
   service:('a, 'b,
            [< Eliom_service.service_method ],
-           [< Eliom_service.attached ],
+           _,
            [< `Co | `Non_co ], [< `Ext | `Non_ext ],
            [< `WithSuffix | `WithoutSuffix ], 'd, 'e,
            [< Eliom_service.registrable ], 'return Eliom_service.ocaml)
@@ -102,7 +102,7 @@ val exit_to :
   ?https:bool ->
   service:('a, 'b,
            [< Eliom_service.service_method ],
-           [< Eliom_service.attached ],
+           _,
            [< `Co | `Non_co ], [< `Ext | `Non_ext ],
            [< `WithSuffix | `WithoutSuffix ], 'd, 'e,
            [< Eliom_service.registrable ],
@@ -125,7 +125,7 @@ val window_open :
   ?https:bool ->
   service:('a, unit,
            [< Eliom_service.get_service_kind ],
-           [< Eliom_service.attached ],
+           _,
            [< `Co | `Non_co ], [< `Ext | `Non_ext ],
            [< `WithSuffix | `WithoutSuffix ], _, unit,
            [< Eliom_service.registrable ], _)
@@ -146,7 +146,7 @@ val change_url :
   ?absolute_path:bool ->
   ?https:bool ->
   service:('get, unit, [< Eliom_service.get_service_kind ],
-           [< Eliom_service.attached ],
+           _,
            [< `Co | `Non_co ], [< `Ext | `Non_ext ],
            [< Eliom_service.suff ], 'gn, unit,
            [< Eliom_service.registrable ], 'return) Eliom_service.service ->
@@ -165,7 +165,7 @@ val call_service :
   ?https:bool ->
   service:('a, 'b,
            [< Eliom_service.service_method ],
-           [< Eliom_service.attached],
+           _,
            [< `Co | `Non_co ], [< `Ext | `Non_ext ],
            [< `WithSuffix | `WithoutSuffix ], 'd, 'e,
            [< Eliom_service.registrable ], 'return)

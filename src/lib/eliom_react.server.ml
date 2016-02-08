@@ -101,7 +101,7 @@ struct
           (unit,
            'a,
            [`Post],
-           [ Eliom_service.non_attached_kind],
+           Eliom_service.na_s,
            [ `Co ], [ `Non_ext ],
            [ `WithoutSuffix ],
            unit,

@@ -257,10 +257,10 @@ let register_aux pages
 				  ~absolute:true
 				  ~service:
 				  (service :
-				     ('a, 'b, [< service_method],[<attached], [< `Co | `Non_co ], [< `Non_ext ],
+				     ('a, 'b, [< service_method], _, [< `Co | `Non_co ], [< `Non_ext ],
 				      [< Eliom_service.suff ], 'c, 'd, [ `Registrable ],
 				      'return) Eliom_service.service :>
-				     ('a, 'b, [< service_method],[<attached], _, _,
+				     ('a, 'b, [< service_method], _, _, _,
 				      [< Eliom_service.suff ], 'c, 'd,
 				      [< Eliom_service.registrable ], 'return)
 				     Eliom_service.service)
@@ -632,7 +632,7 @@ let register_coservice pages
     ?timeout
     ?https
     ~(fallback: (unit, unit, [< Eliom_service.service_method > `Get ],
-                 [> Eliom_service.attached_kind ],
+                 Eliom_service.a_s,
                  _, _,
                  [ `WithoutSuffix ], unit, unit,
                  [< Eliom_service.registrable ], 'returnT)
@@ -1075,18 +1075,18 @@ end
 
 module type REG_PARAM_ALPHA_RETURN =
 sig
-  type ('a, 'b) page
+  type ('a, 'b, 'att) page
   type 'a return
   type 'a result
   include "sigs/eliom_reg_param.mli"
-    subst type page := ('a, 'b) page
+    subst type page := ('a, 'b, 'att) page
       and type return := 'b return
       and type result := 'a result
 end
 
 module MakeRegister_AlphaReturn(Pages : REG_PARAM_ALPHA_RETURN) = struct
 
-  type ('a, 'b) page = ('a, 'b) Pages.page
+  type ('a, 'b, 'att) page = ('a, 'b, 'att) Pages.page
   type options = Pages.options
   type 'b return = 'b Pages.return
   type 'a result = 'a Pages.result

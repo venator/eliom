@@ -1,4 +1,4 @@
-type ('a, 'b) page = page
+type ('a, 'b, 'att) page = page
 type options = options
 type 'b return = return
 type 'a result = result

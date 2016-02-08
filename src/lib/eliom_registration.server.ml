@@ -611,7 +611,7 @@ module Unit = Eliom_mkreg.MakeRegister(Unit_reg_base)
  *)
 module Any_reg_base = struct
 
-  type ('a, 'b) page = 'a kind
+  type ('a, 'b, 'c) page = 'a kind
   type options = unit
   type 'a return = 'a
   type 'a result = 'a kind
@@ -2298,8 +2298,8 @@ module String_redirection = Eliom_mkreg.MakeRegister(String_redir_reg_base)
 
 module Redir_reg_base = struct
 
-    type ('a, 'b) page =
-      (unit, unit, Eliom_service.get_service_kind , Eliom_service.attached,
+    type ('a, 'b, 'att) page =
+      (unit, unit, Eliom_service.get_service_kind , 'att,
        [ `Co | `Non_co ], [ `Ext | `Non_ext ],
        [ `WithoutSuffix ],
        unit, unit, Eliom_service.registrable, 'b)
