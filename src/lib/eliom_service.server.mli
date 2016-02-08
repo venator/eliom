@@ -34,35 +34,12 @@ open Eliom_parameter
 
 (** {3 Attached or Non-attached} *)
 
-(** The abstract type for attached service representation. *)
-type a_s
-
-(** The abstract type for non-attached service representation. *)
-type na_s
-
-type 'a attached_info =
-  | Attached : a_s -> a_s attached_info
-  | Nonattached : na_s -> na_s attached_info
-
 (** {3 POST or GET parameters} *)
 
-(** The kind of a service is [`Post] when there is at least one POST
-    parameters. It is [`Get] otherwise. *)
-type service_method = [ `Get | `Post | `Put | `Delete ]
+(** The kind of a service is post when there is at least one POST
+    parameters. It is get otherwise. *)
 
 (** {3 Common subtypes of [service_method] } *)
-
-(** Restriction of [service_method] to GET services. *)
-type get_service_kind = [`Get]
-
-(** Restriction of [service_method] to POST services. *)
-type post_service_kind = [`Post]
-
-(** Restriction of [service_method] to PUT services. *)
-type put_service_kind = [`Put]
-
-(** Restriction of [service_method] to DELETE services. *)
-type delete_service_kind = [`Delete]
 
 (** {3 Kind of parameters} *)
 
@@ -97,45 +74,18 @@ type registrable = [ `Registrable | `Unregistrable ]
     - [ 'ret] is an information on what the service returns.
             See {!Eliom_registration.kind}.
 *)
-type ('get,'post,+'meth,'attached,+'co,+'ext,+'tipo,'gn,'pn,+'reg,+'ret) service
-  constraint 'meth = [< service_method ]
+type ('get, 'post, 'meth, 'attached, +'co, +'ext,
+      +'tipo, 'gn, 'pn, +'reg,+'ret) service
   constraint 'co = [< `Co | `Non_co ]
   constraint 'ext = [< `Ext | `Non_ext ]
   constraint 'tipo = [< suff ]
   constraint 'reg = [< registrable ]
 
-(** Types of groups of services. *)
-
-type http
-type appl
-
-type +'a ocaml
-type 'a non_ocaml
-
-type ext
-type non_ext
-
-type ('r, 'e) rt =
-  | Ocaml  : ('r ocaml, ext) rt
-  | Http   : (http non_ocaml, ext) rt
-  | Appl   : (appl non_ocaml, non_ext) rt
-  (* FIXME! temporary to get current registration modules
-     working. REMOVE! *)
-  | Unsafe : ('a, ext) rt
-
 (** {2 Registration of services} *)
 
 include Eliom_service_sigs.S_with_external
-  with type a_s := a_s
-   and type na_s := na_s
-   and type ('a, 'b, +'c, +'d, +'e, +'f, +'g, 'h, 'i, +'j, +'k) service :=
-     ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k) service
-   and type http := http
-   and type appl := appl
-   and type 'a ocaml := 'a ocaml
-   and type 'a non_ocaml := 'a non_ocaml
-   and type ext := ext
-   and type ('r, 'e) rt := ('r, 'e) rt
+  with type ('a, 'b, 'c, 'd, +'e, +'f, +'g, 'h, 'i, +'j, +'k) service :=
+    ('a, 'b, 'c, 'd, 'e, 'f, 'g, 'h, 'i, 'j, 'k) service
 
 (** {2 Static loading of Eliom modules} *)
 
@@ -171,7 +121,7 @@ val register_eliom_module : string -> (unit -> unit) -> unit
     the configuration file with the staticmod extension. *)
 val static_dir :
   unit ->
-  (string list, unit, [> `Get],a_s,
+  (string list, unit, get, a_s,
    [> `Co | `Non_co ], [> `Ext | `Non_ext ],
    [ `WithSuffix ],
    [ `One of string list ] param_name, unit, [> `Unregistrable ],
@@ -181,7 +131,7 @@ val static_dir :
 (** Same as {!static_dir} but forcing https link. *)
 val https_static_dir :
   unit ->
-  (string list, unit, [> `Get], a_s, [> `Co | `Non_co ], [> `Ext | `Non_ext ],
+  (string list, unit, get, a_s, [> `Co | `Non_co ], [> `Ext | `Non_ext ],
    [ `WithSuffix ],
    [ `One of string list ] param_name, unit, [> `Unregistrable ],
    http non_ocaml)
@@ -192,7 +142,7 @@ val static_dir_with_params :
   ?keep_nl_params:[ `All | `Persistent | `None ] ->
   get_params:('a, [`WithoutSuffix], 'an) params_type ->
   unit ->
-  ((string list * 'a), unit, [> `Get], a_s, [> `Co | `Non_co ], [> `Ext | `Non_ext ],
+  ((string list * 'a), unit, get, a_s, [> `Co | `Non_co ], [> `Ext | `Non_ext ],
    [ `WithSuffix ],
    [ `One of string list ] param_name *'an, unit, [> `Unregistrable ],
    http non_ocaml)
@@ -203,7 +153,7 @@ val https_static_dir_with_params :
   ?keep_nl_params:[ `All | `Persistent | `None ] ->
   get_params:('a, [`WithoutSuffix], 'an) params_type ->
   unit ->
-  ((string list * 'a), unit, [> `Get], a_s, [> `Co | `Non_co ], [> `Ext | `Non_ext ],
+  ((string list * 'a), unit, get, a_s, [> `Co | `Non_co ], [> `Ext | `Non_ext ],
    [ `WithSuffix ],
    [ `One of string list ] param_name *'an, unit, [> `Unregistrable ],
    http non_ocaml)
@@ -223,14 +173,14 @@ val https_static_dir_with_params :
     it with <a> links, not only forms.  It does not keep non attached
     GET parameters.  *)
 val void_coservice' :
-  (unit, unit, [> `Get], na_s, [> `Co ], [> `Non_ext ],
+  (unit, unit, get, na_s, [> `Co ], [> `Non_ext ],
    [ `WithoutSuffix ],
    unit, unit, [> `Unregistrable ], _ non_ocaml)
   service
 
 (** Same as {!void_coservice'} but forcing https. *)
 val https_void_coservice' :
-  (unit, unit, [> `Get], na_s,
+  (unit, unit, get, na_s,
    [> `Co | `Non_co ], [> `Ext | `Non_ext ],
    [ `WithoutSuffix ],
    unit, unit, [> `Unregistrable ], _ non_ocaml)
@@ -238,7 +188,7 @@ val https_void_coservice' :
 
 (** Same as {!void_coservice'} but keeps non attached GET parameters. *)
 val void_hidden_coservice' :
-  (unit, unit, [> `Get], na_s,
+  (unit, unit, get, na_s,
    [> `Co ], [> `Non_ext ],
    [ `WithoutSuffix ],
    unit, unit, [> `Unregistrable ], _ non_ocaml)
@@ -246,7 +196,7 @@ val void_hidden_coservice' :
 
 (** Same as {!void_hidden_coservice'} but forcing https. *)
 val https_void_hidden_coservice' :
-  (unit, unit, [> `Get], na_s,
+  (unit, unit, get, na_s,
    [> `Co ], [> `Non_ext ],
    [ `WithoutSuffix ],
    unit, unit, [> `Unregistrable ], _ non_ocaml)
@@ -275,7 +225,7 @@ val preapply :
     on the service returned by this function. *)
 val attach_coservice' :
   fallback:
-    (unit, unit, [< `Get ], a_s,
+    (unit, unit, get, a_s,
      [< `Co | `Non_co ], [< `Non_ext ],
      [< suff ], unit, unit, 'rg1, 'return1) service ->
   service: ('get, 'post, 'meth, na_s,
@@ -321,7 +271,7 @@ val unregister :
 (**/**)
 
 val get_get_or_post :
-  (_, _, [< service_method] as 'c, _, _, _, _, _, _, _, _) service -> 'c
+  (_, _, 'm, _, _, _, _, _, _, _, _) service -> 'm service_method
 
 val get_info :
   (_, _, _, 'att, _, _, _, _, _, _, _) service ->

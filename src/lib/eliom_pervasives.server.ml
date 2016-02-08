@@ -5,7 +5,7 @@ type 'a client_value = 'a Eliom_lib.client_value
 
 type 'a fragment = 'a client_value
 
-type ('a, +'b) server_function =
+type ('a, 'b) server_function =
   ('a, 'b) server_function_service * Eliom_wrap.unwrapper
 
 

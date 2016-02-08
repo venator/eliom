@@ -19,24 +19,47 @@
 
 module type S_types = sig
 
-  type ('a, 'e) rt
+  type get
+  type put
+  type post
+  type delete
+
+  type _ service_method =
+    | Get    : get service_method
+    | Post   : post service_method
+    | Put    : put service_method
+    | Delete : delete service_method
 
   type a_s
   type na_s
 
-  type ('get,'post,+'meth,'attached,+'co,+'ext,
-        +'tipo,'gn,'pn,+'reg,+'ret) service
-    constraint 'meth = [< `Get | `Post | `Put | `Delete ]
-    constraint 'co = [< `Co | `Non_co ]
-    constraint 'ext = [< `Ext | `Non_ext ]
-    constraint 'tipo = [< `WithSuffix | `WithoutSuffix ]
-    constraint 'reg = [< `Registrable | `Unregistrable ]
+  type 'a attached_info =
+    | Attached : a_s -> a_s attached_info
+    | Nonattached : na_s -> na_s attached_info
 
   type http
   type appl
 
   type 'a ocaml
   type 'a non_ocaml
+
+  type ext
+  type non_ext
+
+  type ('r, 'e) rt =
+    | Ocaml  : ('r ocaml, ext) rt
+    | Http   : (http non_ocaml, ext) rt
+    | Appl   : (appl non_ocaml, non_ext) rt
+    (* FIXME! temporary to get current registration modules
+       working. REMOVE! *)
+    | Unsafe : ('a, ext) rt
+
+  type ('get, 'post, 'meth, 'attached, +'co, +'ext,
+        +'tipo, 'gn, 'pn, +'reg, +'ret) service
+    constraint 'co = [< `Co | `Non_co ]
+    constraint 'ext = [< `Ext | `Non_ext ]
+    constraint 'tipo = [< `WithSuffix | `WithoutSuffix ]
+    constraint 'reg = [< `Registrable | `Unregistrable ]
 
 end
 
@@ -92,7 +115,7 @@ module type S = sig
       ('get, [< `WithSuffix | `WithoutSuffix ] as 'tipo,'gn)
         Eliom_parameter.params_type ->
     unit ->
-    ('get,unit,[> `Get], a_s, [> `Non_co ], [> `Non_ext ],
+    ('get, unit, get, a_s, [> `Non_co ], [> `Non_ext ],
      'tipo, 'gn, unit, [> `Registrable ], 'rt) service
 
   (** The function [post_service ~fallback ~post_params ()] creates a
@@ -114,7 +137,7 @@ module type S = sig
     ?https:bool ->
     rt:('rt, _) rt ->
     fallback:
-      ('get, unit, [< `Get], a_s,
+      ('get, unit, get, a_s,
        'co, [< `Non_ext ],
        [< `WithSuffix | `WithoutSuffix] as 'tipo, 'gn, unit,
        [< `Registrable ], 'rt) service ->
@@ -123,7 +146,7 @@ module type S = sig
     post_params:
       ('post, [`WithoutSuffix], 'pn) Eliom_parameter.params_type ->
     unit ->
-    ('get, 'post, [> `Post], a_s, 'co, [< `Non_ext],
+    ('get, 'post, post, a_s, 'co, [< `Non_ext],
      'tipo, 'gn, 'pn, [> `Registrable ], 'rt) service
 
   (** The function [put_service ~path ~get_params ()] creates a
@@ -145,7 +168,7 @@ module type S = sig
         Eliom_parameter.params_type ->
     unit ->
     ('get, Eliom_parameter.raw_post_data,
-     [> `Put], a_s, [> `Non_co ], [> `Non_ext], 'tipo, 'gn,
+     put, a_s, [> `Non_co ], [> `Non_ext], 'tipo, 'gn,
      Eliom_parameter.no_param_name, [> `Registrable ], 'rt) service
 
   (** The function [delete_service ~path ~get_params ()] creates a
@@ -167,7 +190,7 @@ module type S = sig
         Eliom_parameter.params_type ->
     unit ->
     ('get, Eliom_parameter.raw_post_data,
-     [> `Delete], a_s,
+     delete, a_s,
      [> `Non_co ], [> `Non_ext],
      'tipo, 'gn,
      Eliom_parameter.no_param_name, [> `Registrable ], 'rt) service
@@ -225,7 +248,7 @@ module type S = sig
     ?https:bool ->
     rt:('rt, _) rt ->
     fallback:
-      (unit, unit, [<`Get], a_s,
+      (unit, unit, get, a_s,
        [< `Non_co ], [< `Non_ext ],
        [ `WithoutSuffix ] as 'tipo, unit, unit,
        [< `Registrable | `Unregistrable ], 'rt) service ->
@@ -233,7 +256,7 @@ module type S = sig
     get_params:
       ('get,[`WithoutSuffix],'gn) Eliom_parameter.params_type ->
     unit ->
-    ('get, unit, [> `Get], a_s, [> `Co ], [> `Non_ext ],
+    ('get, unit, get, a_s, [> `Co ], [> `Non_ext ],
      'tipo, 'gn, unit, [> `Registrable ], 'rt) service
 
   (** The function [post_coservice ~fallback ~post_params] creates an
@@ -259,7 +282,7 @@ module type S = sig
     ?https:bool ->
     rt:('rt, _) rt ->
     fallback:
-      ('get, unit, [<`Get], a_s,
+      ('get, unit, get, a_s,
        _, [< `Non_ext ],
        [< `WithSuffix | `WithoutSuffix ] as 'tipo,
        'gn, unit, [< `Registrable ], 'rt) service ->
@@ -267,7 +290,7 @@ module type S = sig
     post_params:
       ('post, [`WithoutSuffix], 'pn) Eliom_parameter.params_type ->
     unit ->
-    ('get, 'post, [>`Post], a_s,
+    ('get, 'post, post, a_s,
      [> `Co ], [> `Non_ext ], 'tipo, 'gn, 'pn, [> `Registrable ], 'rt)
       service
 
@@ -295,7 +318,7 @@ module type S = sig
     fallback:
       (unit,
        Eliom_parameter.raw_post_data,
-       [`Put],
+       put,
        a_s,
        [ `Non_co ], [ `Non_ext ],
        [ `WithoutSuffix ] as 'tipo,
@@ -305,7 +328,7 @@ module type S = sig
     get_params:
       ('get,[`WithoutSuffix],'gn) Eliom_parameter.params_type ->
     unit ->
-    ('get, Eliom_parameter.raw_post_data,[> `Put],
+    ('get, Eliom_parameter.raw_post_data,put,
      a_s, [> `Co ], [> `Non_ext ],
      'tipo, 'gn, Eliom_parameter.no_param_name,
      [> `Registrable ], 'rt) service
@@ -332,7 +355,7 @@ module type S = sig
     ?https:bool ->
     rt:('rt, _) rt ->
     fallback:
-      (unit, Eliom_parameter.raw_post_data,[`Delete],
+      (unit, Eliom_parameter.raw_post_data, delete,
        a_s, [ `Non_co ], [ `Non_ext ],
        [ `WithoutSuffix ] as 'tipo,
        unit, Eliom_parameter.no_param_name,
@@ -342,7 +365,7 @@ module type S = sig
       ('get,[`WithoutSuffix],'gn) Eliom_parameter.params_type ->
     unit ->
     ('get, Eliom_parameter.raw_post_data,
-     [>`Delete], a_s, [> `Co ], [> `Non_ext ],
+     delete, a_s, [> `Co ], [> `Non_ext ],
      'tipo, 'gn, Eliom_parameter.no_param_name,
      [> `Registrable ], 'rt) service
 
@@ -371,7 +394,7 @@ module type S = sig
     get_params:
       ('get, [`WithoutSuffix], 'gn) Eliom_parameter.params_type ->
     unit ->
-    ('get, unit, [> `Get], na_s,
+    ('get, unit, get, na_s,
      [> `Co], [> `Non_ext ], [`WithoutSuffix],
      'gn, unit, [> `Registrable ], 'rt) service
 
@@ -405,7 +428,7 @@ module type S = sig
     post_params:
       ('post, [`WithoutSuffix], 'pn) Eliom_parameter.params_type ->
     unit ->
-    (unit, 'post,[>`Post], na_s,
+    (unit, 'post,post, na_s,
      [> `Co ], [> `Non_ext ], [ `WithoutSuffix ],
      unit, 'pn, [> `Registrable ], 'rt) service
 
@@ -431,7 +454,7 @@ module type S = sig
     get_params:
       ('get, [`WithoutSuffix], 'gn) Eliom_parameter.params_type ->
     unit ->
-    ('get, Eliom_parameter.raw_post_data, [>`Put],
+    ('get, Eliom_parameter.raw_post_data, put,
      na_s, [> `Co ], [> `Non_ext ],
      [`WithoutSuffix], 'gn,
      Eliom_parameter.no_param_name, [> `Registrable ], 'rt) service
@@ -458,7 +481,7 @@ module type S = sig
     get_params:
       ('get, [`WithoutSuffix], 'gn) Eliom_parameter.params_type ->
     unit ->
-    ('get, Eliom_parameter.raw_post_data, [> `Delete],
+    ('get, Eliom_parameter.raw_post_data, delete,
      na_s, [> `Co ], [> `Non_ext ],
      [`WithoutSuffix], 'gn,
      Eliom_parameter.no_param_name, [> `Registrable ], 'rt) service
@@ -468,8 +491,6 @@ end
 module type S_with_external = sig
 
   include S
-
-  type ext
 
   (** The function [external_service ~prefix ~path ~get_params ()]
       creates a service for an external web site, that will use GET
@@ -499,7 +520,7 @@ module type S_with_external = sig
       ('get, [< `WithSuffix | `WithoutSuffix ] as 'tipo, 'gn)
         Eliom_parameter.params_type ->
     unit ->
-    ('get, unit, [>`Get], a_s,
+    ('get, unit, get, a_s,
      [> `Non_co], [> `Ext ],
      'tipo, 'gn, unit, [> `Unregistrable ], 'rt) service
 
@@ -515,7 +536,7 @@ module type S_with_external = sig
     post_params:
       ('post, [ `WithoutSuffix ], 'pn) Eliom_parameter.params_type ->
     unit ->
-    ('get, 'post, [>`Post], a_s, [> `Non_co ], [> `Ext ], 'tipo,
+    ('get, 'post, post, a_s, [> `Non_co ], [> `Ext ], 'tipo,
      'gn, 'pn, [> `Unregistrable ], 'rt) service
 
   (** Same as {!external_service} but with PUT method. *)
@@ -529,7 +550,7 @@ module type S_with_external = sig
         Eliom_parameter.params_type ->
     unit ->
     ('get, Eliom_parameter.raw_post_data,
-     [> `Put], a_s, [> `Non_co ], [> `Ext ], 'tipo,
+     put, a_s, [> `Non_co ], [> `Ext ], 'tipo,
      'gn, Eliom_parameter.no_param_name, [> `Unregistrable ], 'rt)
       service
 
@@ -544,7 +565,7 @@ module type S_with_external = sig
         Eliom_parameter.params_type ->
     unit ->
     ('get, Eliom_parameter.raw_post_data,
-     [>`Delete ], a_s, [> `Non_co ], [> `Ext ], 'tipo,
+     delete, a_s, [> `Non_co ], [> `Ext ], 'tipo,
      'gn, Eliom_parameter.no_param_name, [> `Unregistrable ], 'rt)
       service
 

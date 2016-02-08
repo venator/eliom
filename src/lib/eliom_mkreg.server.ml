@@ -257,10 +257,10 @@ let register_aux pages
 				  ~absolute:true
 				  ~service:
 				  (service :
-				     ('a, 'b, [< service_method], _, [< `Co | `Non_co ], [< `Non_ext ],
+				     ('a, 'b, _, _, [< `Co | `Non_co ], [< `Non_ext ],
 				      [< Eliom_service.suff ], 'c, 'd, [ `Registrable ],
 				      'return) Eliom_service.service :>
-				     ('a, 'b, [< service_method], _, _, _,
+				     ('a, 'b, _, _, _, _,
 				      [< Eliom_service.suff ], 'c, 'd,
 				      [< Eliom_service.registrable ], 'return)
 				     Eliom_service.service)
@@ -631,11 +631,12 @@ let register_coservice pages
     ?max_use
     ?timeout
     ?https
-    ~(fallback: (unit, unit, [< Eliom_service.service_method > `Get ],
-                 Eliom_service.a_s,
-                 _, _,
-                 [ `WithoutSuffix ], unit, unit,
-                 [< Eliom_service.registrable ], 'returnT)
+    ~(fallback:
+        (unit, unit, Eliom_service.get,
+         Eliom_service.a_s,
+         _, _,
+         [ `WithoutSuffix ], unit, unit,
+         [< Eliom_service.registrable ], 'returnT)
           Eliom_service.service)
     ~rt
     ~get_params

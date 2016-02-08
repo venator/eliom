@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- *)
+*)
 
 open Eliom_lib
 
@@ -40,19 +40,21 @@ let xhr_with_cookies s =
     | XNever -> None (* actually this will be tested again later
                          in get_onload_form_creators *)
     | XSame_appl (_, tmpl) -> Some tmpl (* Some an = current_page_appl_name *)
-      (* for now we do not know the current_page_appl_name.
-         We will know it only after calling send.
-         In case it is not the same name, we will not send the
-         onload_form_creator_info.
-      *)
+(* for now we do not know the current_page_appl_name.
+   We will know it only after calling send.
+   In case it is not the same name, we will not send the
+   onload_form_creator_info.
+*)
 
 (**********)
 
-let get_or_post_ s = match get_get_or_post s with
-  | `Get -> Ocsigen_http_frame.Http_header.GET
-  | `Post -> Ocsigen_http_frame.Http_header.POST
-  | `Put -> Ocsigen_http_frame.Http_header.PUT
-  | `Delete -> Ocsigen_http_frame.Http_header.DELETE
+let get_or_post_
+    (type m) (s : (_, _, m, _, _, _, _, _, _, _, _) service) =
+  match get_get_or_post s with
+  | Get -> Ocsigen_http_frame.Http_header.GET
+  | Post -> Ocsigen_http_frame.Http_header.POST
+  | Put -> Ocsigen_http_frame.Http_header.PUT
+  | Delete -> Ocsigen_http_frame.Http_header.DELETE
 
 
 (*****************************************************************************)
@@ -132,60 +134,65 @@ let set_delayed_get_or_na_registration_function tables k f =
 let set_delayed_post_registration_function tables k f =
   tables.Eliom_common.csrf_post_registration_functions <-
     Int.Table.add
-    k
-    f
-    tables.Eliom_common.csrf_post_registration_functions
+      k
+      f
+      tables.Eliom_common.csrf_post_registration_functions
 
 
 (*****************************************************************************)
-let remove_service table service =
+let remove_service
+    table
+    (type m)
+    (service : (_, _, m, _, _, _, _, _, _, _, _) service) =
   match get_info_ service with
-    | `Attached attser ->
-        let key_kind = get_or_post_ service in
-        let attserget = get_get_name_ attser in
-        let attserpost = get_post_name_ attser in
-        let sgpt = get_get_params_type_ service in
-        let sppt = get_post_params_type_ service in
-        Eliommod_services.remove_service table
-          (get_sub_path_ attser)
-          {Eliom_common.key_state = (attserget, attserpost);
-           Eliom_common.key_kind = key_kind}
-          (if attserget = Eliom_common.SAtt_no
-             || attserpost = Eliom_common.SAtt_no
-           then (anonymise_params_type sgpt,
-                 anonymise_params_type sppt)
-           else (0, 0))
-    | `Nonattached naser ->
-        let na_name = get_na_name_ naser in
-        Eliommod_naservices.remove_naservice table na_name
+  | `Attached attser ->
+    let key_kind = get_or_post_ service in
+    let attserget = get_get_name_ attser in
+    let attserpost = get_post_name_ attser in
+    let sgpt = get_get_params_type_ service in
+    let sppt = get_post_params_type_ service in
+    Eliommod_services.remove_service
+      table
+      (get_sub_path_ attser)
+      {Eliom_common.key_state = (attserget, attserpost);
+       Eliom_common.key_kind = key_kind}
+      (if attserget = Eliom_common.SAtt_no
+       || attserpost = Eliom_common.SAtt_no
+       then (anonymise_params_type sgpt,
+             anonymise_params_type sppt)
+       else (0, 0))
+  | `Nonattached naser ->
+    let na_name = get_na_name_ naser in
+    Eliommod_naservices.remove_naservice table na_name
 
-let unregister ?scope ?secure service =
+let unregister ?scope ?secure (type m)
+    (service : (_, _, m, _, _, _, _, _, _, _, _) service) =
   let sp = Eliom_common.get_sp_option () in
   match scope with
-    | None
-    | Some `Site ->
+  | None
+  | Some `Site ->
+    let table =
+      match sp with
+      | None ->
+        (match Eliom_common.global_register_allowed () with
+         | Some get_current_sitedata ->
+	   let sitedata = get_current_sitedata () in
+	   sitedata.Eliom_common.global_services
+         | _ -> raise
+		  (Eliom_common.Eliom_site_information_not_available
+                     "unregister"))
+      | Some sp -> get_global_table ()
+    in
+    remove_service table service
+  | Some (#Eliom_common.user_scope as scope) ->
+    match sp with
+    | None ->
+      raise (failwith "Unregistering service for non global scope must be done during a request")
+    | Some sp ->
       let table =
-	match sp with
-          | None ->
-            (match Eliom_common.global_register_allowed () with
-              | Some get_current_sitedata ->
-		let sitedata = get_current_sitedata () in
-		sitedata.Eliom_common.global_services
-              | _ -> raise
-		(Eliom_common.Eliom_site_information_not_available
-                   "unregister"))
-          | Some sp -> get_global_table ()
+        !(Eliom_state.get_session_service_table ~sp ?secure ~scope ())
       in
       remove_service table service
-    | Some (#Eliom_common.user_scope as scope) ->
-      match sp with
-	| None ->
-          raise (failwith "Unregistering service for non global scope must be done during a request")
-	| Some sp ->
-          let table =
-            !(Eliom_state.get_session_service_table ~sp ?secure ~scope ())
-          in
-          remove_service table service
 
 let service = service
 let post_service = post_service
@@ -207,8 +214,8 @@ let external_delete_service = external_delete_service
 (*****************************************************************************)
 let pre_wrap s =
   {s with
-    get_params_type = Eliom_parameter.wrap_param_type s.get_params_type;
-    post_params_type = Eliom_parameter.wrap_param_type s.post_params_type;
+   get_params_type = Eliom_parameter.wrap_param_type s.get_params_type;
+   post_params_type = Eliom_parameter.wrap_param_type s.post_params_type;
   }
 
 (* let wrap s = Eliom_types.wrap_parameters (pre_wrap s) *)
@@ -236,12 +243,12 @@ let get_global_data, modify_global_data =
     if is_site_available () then
       String_map.merge
         (fun compilation_unit_id global site ->
-          match global, site with
-            | None, None -> assert false
-            | Some data, None | None, Some data -> Some data
-            | Some _, Some site_data ->
-              Lwt_log.ign_error_f ~section:Lwt_log.eliom "Compilation unit %s linked globally AND as Eliom module" compilation_unit_id;
-              Some site_data)
+           match global, site with
+           | None, None -> assert false
+           | Some data, None | None, Some data -> Some data
+           | Some _, Some site_data ->
+             Lwt_log.ign_error_f ~section:Lwt_log.eliom "Compilation unit %s linked globally AND as Eliom module" compilation_unit_id;
+             Some site_data)
         !global_data
         (Eliom_reference.Volatile.get site_data)
     else
@@ -266,8 +273,8 @@ let get_compilation_unit_global_data compilation_unit_id =
 let close_server_section ~compilation_unit_id =
   let data = get_compilation_unit_global_data compilation_unit_id in
   data.server_section
-    <- Array.of_list (List.rev !current_server_section_data)
-         :: data.server_section;
+  <- Array.of_list (List.rev !current_server_section_data)
+     :: data.server_section;
   current_server_section_data := []
 
 let close_client_section ~compilation_unit_id injection_data =

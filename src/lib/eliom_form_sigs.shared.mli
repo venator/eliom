@@ -100,7 +100,7 @@ module type LINKS = sig
     ?absolute:bool ->
     ?absolute_path:bool ->
     ?https:bool ->
-    service:('get, unit, [< Eliom_service.get_service_kind ], _, _, _,
+    service:('get, unit, Eliom_service.get, _, _, _,
              [< Eliom_service.suff ], 'gn, unit,
              [< Eliom_service.registrable ],
              'return) Eliom_service.service ->
@@ -187,7 +187,7 @@ module type LINKS = sig
     ?absolute_path:bool ->
     ?https:bool ->
     ?a:Html5_types.a_attrib attrib list ->
-    service:('get, unit, [< Eliom_service.get_service_kind ], _, _,
+    service:('get, unit, Eliom_service.get, _, _,
              (* FIXME *)
              [ `Ext | `Non_ext ],
              [< Eliom_service.suff ], 'd, unit,
@@ -237,7 +237,7 @@ module type S = sig
     ?absolute:bool ->
     ?absolute_path:bool ->
     ?https:bool ->
-    service:('get, 'post, [< post_service_kind ], _, _, _,
+    service:('get, 'post, Eliom_service.post, _, _, _,
              [< suff ], 'gn, 'pn,
              [< registrable ], 'return) service ->
     ?hostname:string ->
@@ -281,7 +281,7 @@ module type S = sig
     ?absolute_path:bool ->
     ?https:bool ->
     ?a:Html5_types.form_attrib attrib list ->
-    service:('get, unit, [< get_service_kind ], _, _, _,
+    service:('get, unit, Eliom_service.get, _, _, _,
              [<suff ], 'gn, 'pn,
              [< registrable ], _ non_ocaml) service ->
     ?hostname:string ->
@@ -300,7 +300,7 @@ module type S = sig
     ?absolute_path:bool ->
     ?https:bool ->
     ?a:Html5_types.form_attrib attrib list ->
-    service:('get, unit, [< get_service_kind ], _, _, _,
+    service:('get, unit, Eliom_service.get, _, _, _,
              [<suff ], 'gn, 'pn,
              [< registrable ], _ non_ocaml) service ->
     ?hostname:string ->
@@ -331,7 +331,7 @@ module type S = sig
     ?absolute_path:bool ->
     ?https:bool ->
     ?a:Html5_types.form_attrib attrib list ->
-    service:('get, 'post, [< post_service_kind ], _, _, _,
+    service:('get, 'post, Eliom_service.post, _, _, _,
              [< suff ], 'gn, 'pn,
              [< registrable ], _ non_ocaml) service ->
     ?hostname:string ->
@@ -352,7 +352,7 @@ module type S = sig
     ?absolute_path:bool ->
     ?https:bool ->
     ?a:Html5_types.form_attrib attrib list ->
-    service:('get, 'post, [< post_service_kind ], _, _, _,
+    service:('get, 'post, Eliom_service.post, _, _, _,
              [< suff ], 'gn, 'pn,
              [< registrable ], _ non_ocaml) service ->
     ?hostname:string ->

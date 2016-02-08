@@ -2299,7 +2299,7 @@ module String_redirection = Eliom_mkreg.MakeRegister(String_redir_reg_base)
 module Redir_reg_base = struct
 
     type ('a, 'b, 'att) page =
-      (unit, unit, Eliom_service.get_service_kind , 'att,
+      (unit, unit, Eliom_service.get , 'att,
        [ `Co | `Non_co ], [ `Ext | `Non_ext ],
        [ `WithoutSuffix ],
        unit, unit, Eliom_service.registrable, 'b)
@@ -2436,10 +2436,10 @@ let _ =
       ?error_handler
       argument_type f ->
       Eliom_pervasives.mk_serv_fun
-      (Ocaml.register_post_coservice'
-         ?scope ?options ?charset ?code ?content_type ?headers ?secure_session ?name
-         ?csrf_safe ?csrf_scope ?csrf_secure ?max_use ?timeout ?https ?error_handler
-         ~post_params:Eliom_parameter.(ocaml "argument" argument_type)
-         (fun () argument -> f argument))
-      (Eliom_wrap.create_unwrapper
-         (Eliom_wrap.id_of_int Eliom_common_base.server_function_unwrap_id_int))
+        (Ocaml.register_post_coservice'
+           ?scope ?options ?charset ?code ?content_type ?headers ?secure_session ?name
+           ?csrf_safe ?csrf_scope ?csrf_secure ?max_use ?timeout ?https ?error_handler
+           ~post_params:Eliom_parameter.(ocaml "argument" argument_type)
+           (fun () argument -> f argument))
+        (Eliom_wrap.create_unwrapper
+           (Eliom_wrap.id_of_int Eliom_common_base.server_function_unwrap_id_int))

@@ -100,7 +100,7 @@ struct
         service :
           (unit,
            'a,
-           [`Post],
+           Eliom_service.post,
            Eliom_service.na_s,
            [ `Co ], [ `Non_ext ],
            [ `WithoutSuffix ],

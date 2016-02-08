@@ -62,7 +62,7 @@ val make_string_uri :
   ?absolute:bool ->
   ?absolute_path:bool ->
   ?https:bool ->
-  service:('get, unit, [<get_service_kind], _, _, _,
+  service:('get, unit, Eliom_service.get, _, _, _,
            [< suff ], 'gn, unit,
            [< registrable ], 'return) service ->
   ?hostname:string ->
@@ -83,7 +83,7 @@ val make_uri_components :
   ?absolute:bool ->
   ?absolute_path:bool ->
   ?https:bool ->
-  service:('get, unit, [< get_service_kind], _, _, _,
+  service:('get, unit, Eliom_service.get, _, _, _,
            [< suff ], 'gn, unit,
            [< registrable ], 'return) service ->
   ?hostname:string ->
@@ -100,7 +100,7 @@ val make_post_uri_components :
   ?absolute:bool ->
   ?absolute_path:bool ->
   ?https:bool ->
-  service:('get, 'post, [< post_service_kind], _, _, _,
+  service:('get, 'post, Eliom_service.post, _, _, _,
            [< suff ], 'gn, 'pn,
            [< registrable ], 'return) service ->
   ?hostname:string ->

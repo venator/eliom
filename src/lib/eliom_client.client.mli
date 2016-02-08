@@ -43,8 +43,7 @@ val change_page :
   ?absolute:bool ->
   ?absolute_path:bool ->
   ?https:bool ->
-  service:('a, 'b,[< Eliom_service.service_method ],
-           _,
+  service:('a, 'b, _, _,
            [< `Co | `Non_co ], [ `Ext | `Non_ext ],
            [< `WithSuffix | `WithoutSuffix ], 'd, 'e,
            [< Eliom_service.registrable ],
@@ -74,9 +73,7 @@ val call_ocaml_service :
   ?absolute:bool ->
   ?absolute_path:bool ->
   ?https:bool ->
-  service:('a, 'b,
-           [< Eliom_service.service_method ],
-           _,
+  service:('a, 'b, _, _,
            [< `Co | `Non_co ], [< `Ext | `Non_ext ],
            [< `WithSuffix | `WithoutSuffix ], 'd, 'e,
            [< Eliom_service.registrable ], 'return Eliom_service.ocaml)
@@ -100,9 +97,7 @@ val exit_to :
   ?absolute:bool ->
   ?absolute_path:bool ->
   ?https:bool ->
-  service:('a, 'b,
-           [< Eliom_service.service_method ],
-           _,
+  service:('a, 'b, _, _,
            [< `Co | `Non_co ], [< `Ext | `Non_ext ],
            [< `WithSuffix | `WithoutSuffix ], 'd, 'e,
            [< Eliom_service.registrable ],
@@ -124,8 +119,7 @@ val window_open :
   ?absolute_path:bool ->
   ?https:bool ->
   service:('a, unit,
-           [< Eliom_service.get_service_kind ],
-           _,
+           Eliom_service.get, _,
            [< `Co | `Non_co ], [< `Ext | `Non_ext ],
            [< `WithSuffix | `WithoutSuffix ], _, unit,
            [< Eliom_service.registrable ], _)
@@ -145,7 +139,7 @@ val change_url :
   ?absolute:bool ->
   ?absolute_path:bool ->
   ?https:bool ->
-  service:('get, unit, [< Eliom_service.get_service_kind ],
+  service:('get, unit, Eliom_service.get,
            _,
            [< `Co | `Non_co ], [< `Ext | `Non_ext ],
            [< Eliom_service.suff ], 'gn, unit,
@@ -163,9 +157,7 @@ val call_service :
   ?absolute:bool ->
   ?absolute_path:bool ->
   ?https:bool ->
-  service:('a, 'b,
-           [< Eliom_service.service_method ],
-           _,
+  service:('a, 'b, _, _,
            [< `Co | `Non_co ], [< `Ext | `Non_ext ],
            [< `WithSuffix | `WithoutSuffix ], 'd, 'e,
            [< Eliom_service.registrable ], 'return)
