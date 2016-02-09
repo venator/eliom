@@ -611,7 +611,7 @@ module Unit = Eliom_mkreg.MakeRegister(Unit_reg_base)
  *)
 module Any_reg_base = struct
 
-  type ('a, 'b, 'c) page = 'a kind
+  type ('a, 'b, 'c, 'co, 'ext, 'reg) page = 'a kind
   type options = unit
   type 'a return = 'a
   type 'a result = 'a kind
@@ -1385,10 +1385,9 @@ module Ocaml = struct
       ?content_type
       ?headers
       ?secure_session
-      ~(service : ('get, 'post, _, _,
-                   _, [< `Non_ext ],
-                   [< suff ], 'gn, 'pn, [ `Registrable ],
-                   'return Eliom_service.ocaml)
+      ~(service :
+          ('get, 'post, _, _, _, Eliom_service.non_ext,
+           _, 'gn, 'pn, reg, 'return Eliom_service.ocaml)
             Eliom_service.service)
       ?(error_handler : ((string * exn) list -> 'return Lwt.t) option)
       (f : ('get -> 'post -> 'return Lwt.t)) =
@@ -2298,11 +2297,10 @@ module String_redirection = Eliom_mkreg.MakeRegister(String_redir_reg_base)
 
 module Redir_reg_base = struct
 
-    type ('a, 'b, 'att) page =
-      (unit, unit, Eliom_service.get , 'att,
-       [ `Co | `Non_co ], [ `Ext | `Non_ext ],
+    type ('a, 'b, 'att, 'co, 'ext, 'reg) page =
+      (unit, unit, Eliom_service.get , 'att, 'co, 'ext,
        [ `WithoutSuffix ],
-       unit, unit, Eliom_service.registrable, 'b)
+       unit, unit, 'reg, 'b)
         Eliom_service.service
 
   type options =  [ `MovedPermanently

@@ -41,11 +41,11 @@ end
 
 module type REG_PARAM_ALPHA_RETURN =
 sig
-  type ('a, 'b, 'att) page
+  type ('a, 'b, 'att, 'co, 'ext, 'reg) page
   type 'a return
   type 'a result
   include "sigs/eliom_reg_param.mli"
-    subst type page := ('a, 'b, 'att) page
+    subst type page := ('a, 'b, 'att, 'co, 'ext, 'reg) page
       and type return := 'b return
       and type result := 'a result
 end
@@ -53,7 +53,7 @@ end
 module MakeRegister_AlphaReturn(Pages: REG_PARAM_ALPHA_RETURN) : sig
 
   include "sigs/eliom_reg_alpha_return_unsafe.mli"
-     subst type page := ('a, 'b, 'att) Pages.page
+     subst type page := ('a, 'b, 'att, 'co, 'ext, 'reg) Pages.page
        and type options := Pages.options
        and type return := 'b Pages.return
        and type result := 'a Pages.result

@@ -100,10 +100,9 @@ module type LINKS = sig
     ?absolute:bool ->
     ?absolute_path:bool ->
     ?https:bool ->
-    service:('get, unit, Eliom_service.get, _, _, _,
-             [< Eliom_service.suff ], 'gn, unit,
-             [< Eliom_service.registrable ],
-             'return) Eliom_service.service ->
+    service:
+      ('get, unit, Eliom_service.get, _, _, _, _, _, unit, _, _)
+        Eliom_service.service ->
     ?hostname:string ->
     ?port:int ->
     ?fragment:string ->
@@ -187,12 +186,9 @@ module type LINKS = sig
     ?absolute_path:bool ->
     ?https:bool ->
     ?a:Html5_types.a_attrib attrib list ->
-    service:('get, unit, Eliom_service.get, _, _,
-             (* FIXME *)
-             [ `Ext | `Non_ext ],
-             [< Eliom_service.suff ], 'd, unit,
-             [< Eliom_service.registrable ],
-             _ Eliom_service.non_ocaml)
+    service:
+      ('get, unit, Eliom_service.get, _, _, _,
+       _, _, unit, _, _ Eliom_service.non_ocaml)
         Eliom_service.service ->
     ?hostname:string ->
     ?port:int ->
@@ -237,9 +233,9 @@ module type S = sig
     ?absolute:bool ->
     ?absolute_path:bool ->
     ?https:bool ->
-    service:('get, 'post, Eliom_service.post, _, _, _,
-             [< suff ], 'gn, 'pn,
-             [< registrable ], 'return) service ->
+    service:
+      ('get, 'post, Eliom_service.post, _, _, _, _, _, _, _, _)
+        service ->
     ?hostname:string ->
     ?port:int ->
     ?fragment:string ->
@@ -281,9 +277,10 @@ module type S = sig
     ?absolute_path:bool ->
     ?https:bool ->
     ?a:Html5_types.form_attrib attrib list ->
-    service:('get, unit, Eliom_service.get, _, _, _,
-             [<suff ], 'gn, 'pn,
-             [< registrable ], _ non_ocaml) service ->
+    service:
+      ('get, unit, Eliom_service.get, _, _, _,
+       _, 'gn, _, _, _ non_ocaml)
+        service ->
     ?hostname:string ->
     ?port:int ->
     ?fragment:string ->
@@ -300,9 +297,9 @@ module type S = sig
     ?absolute_path:bool ->
     ?https:bool ->
     ?a:Html5_types.form_attrib attrib list ->
-    service:('get, unit, Eliom_service.get, _, _, _,
-             [<suff ], 'gn, 'pn,
-             [< registrable ], _ non_ocaml) service ->
+    service:
+      ('get, unit, Eliom_service.get, _, _, _, _, 'gn, _, _, _ non_ocaml)
+        service ->
     ?hostname:string ->
     ?port:int ->
     ?fragment:string ->
@@ -331,9 +328,10 @@ module type S = sig
     ?absolute_path:bool ->
     ?https:bool ->
     ?a:Html5_types.form_attrib attrib list ->
-    service:('get, 'post, Eliom_service.post, _, _, _,
-             [< suff ], 'gn, 'pn,
-             [< registrable ], _ non_ocaml) service ->
+    service:
+      ('get, _, Eliom_service.post, _, _, _,
+       _, _, 'pn, _, _ non_ocaml)
+        service ->
     ?hostname:string ->
     ?port:int ->
     ?fragment:string ->
@@ -352,9 +350,9 @@ module type S = sig
     ?absolute_path:bool ->
     ?https:bool ->
     ?a:Html5_types.form_attrib attrib list ->
-    service:('get, 'post, Eliom_service.post, _, _, _,
-             [< suff ], 'gn, 'pn,
-             [< registrable ], _ non_ocaml) service ->
+    service:
+      ('get, _, Eliom_service.post, _, _, _, _, _, 'pn, _, _ non_ocaml)
+        service ->
     ?hostname:string ->
     ?port:int ->
     ?fragment:string ->

@@ -127,7 +127,8 @@ end
 
 (** if wake is false, the registration of the channel won't
     activate the handling loop ( no request will be sent ). Default is true *)
-val register : ?wake:bool -> 'a Eliom_comet_base.wrapped_channel ->
+val register :
+  ?wake:bool -> 'a Eliom_comet_base.wrapped_channel ->
   'a Lwt_stream.t
 
 (** [restart ()] Restarts the loop waiting for server messages. It is

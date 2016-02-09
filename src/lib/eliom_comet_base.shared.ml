@@ -66,22 +66,28 @@ type answer =
 deriving (Json)
 
 type comet_service =
-  (unit, comet_request, Eliom_service.post, Eliom_service.a_s,
-   [ `Co | `Non_co ], [ `Ext | `Non_ext ],
-   [ `WithoutSuffix ], unit,
-   [ `One of comet_request Eliom_parameter.ocaml ] Eliom_parameter.param_name,
-   Eliom_service.registrable,
-   Eliom_service.http Eliom_service.non_ocaml )
-    Eliom_service.service
+    Comet_service :
+      (unit, comet_request, Eliom_service.post, Eliom_service.a_s,
+       'co, 'ext,
+       [ `WithoutSuffix ], unit,
+       [ `One of comet_request Eliom_parameter.ocaml ]
+         Eliom_parameter.param_name,
+       'reg,
+       Eliom_service.http Eliom_service.non_ocaml)
+        Eliom_service.service ->
+    comet_service
 
 type internal_comet_service =
-  (unit, comet_request, Eliom_service.post, Eliom_service.a_s,
-   [ `Co | `Non_co ], [ `Non_ext ],
-   [ `WithoutSuffix ], unit,
-   [ `One of comet_request Eliom_parameter.ocaml ] Eliom_parameter.param_name,
-   [ `Registrable ],
-   Eliom_service.http Eliom_service.non_ocaml )
-    Eliom_service.service
+    Internal_comet_service :
+      (unit, comet_request, Eliom_service.post, Eliom_service.a_s,
+       'co, Eliom_service.non_ext,
+       [ `WithoutSuffix ], unit,
+       [ `One of comet_request Eliom_parameter.ocaml ]
+         Eliom_parameter.param_name,
+       Eliom_service.reg,
+       Eliom_service.http Eliom_service.non_ocaml)
+        Eliom_service.service ->
+    internal_comet_service
 
 type stateless_kind =
   | After_kind of int
@@ -92,16 +98,17 @@ type 'a wrapped_channel =
   | Stateful_channel of (comet_service * 'a chan_id)
   | Stateless_channel of (comet_service * 'a chan_id * stateless_kind)
 
-
 type 'a bus_send_service =
+  Bus_send_service :
     (unit,
      'a list, Eliom_service.post, Eliom_service.na_s,
-     [ `Co ], [ `Non_ext ],
+     Eliom_service.co, Eliom_service.non_ext,
      [ `WithoutSuffix ],
      unit,
      [ `One of 'a list Eliom_parameter.ocaml ] Eliom_parameter.param_name,
-     [ `Registrable ],
+     Eliom_service.reg,
      Eliom_service.http Eliom_service.non_ocaml
-    ) Eliom_service.service
+    ) Eliom_service.service ->
+  'a bus_send_service
 
 type ('a, 'b) wrapped_bus = 'b wrapped_channel * 'a bus_send_service

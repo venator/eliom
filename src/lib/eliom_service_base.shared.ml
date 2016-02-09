@@ -27,9 +27,11 @@ type suff =
   [ `WithSuffix
   | `WithoutSuffix ]
 
-type co_flag = [ `Co | `Non_co ]
+type co
+type non_co
 
-type ext_flag = [ `Ext | `Non_ext ]
+type ext
+type non_ext
 
 type get
 type post
@@ -42,12 +44,11 @@ type _ service_method =
   | Put    : put service_method
   | Delete : delete service_method
 
+type reg
+type non_reg
+
 (* post means that there is at least one post param (possibly only the
    state post param). get is for all the other cases.  *)
-
-type registrable =
-  [ `Registrable
-  | `Unregistrable ]
 
 type a_s = {
   prefix: string; (* name of the server and protocol, for external links. Ex: http://ocsigen.org *)
@@ -105,9 +106,6 @@ type appl
 type 'a ocaml
 type 'a non_ocaml
 
-type ext
-type non_ext
-
 type ('r, 'e) rt =
   | Ocaml  : ('r ocaml, ext) rt
   | Http   : (http non_ocaml, ext) rt
@@ -117,8 +115,8 @@ type ('r, 'e) rt =
   | Unsafe : ('a, ext) rt
 
 (* 'return is the value returned by the service *)
-type ('get, 'post, 'meth, 'attached, +'co, +'ext,
-      +'tipo, 'getnames, 'postnames, +'registr, +'rt) service = {
+type ('get, 'post, 'meth, 'attached, 'co, 'ext,
+      +'tipo, 'getnames, 'postnames, 'reg, +'rt) service = {
   pre_applied_parameters:
     (string * Eliommod_parameters.param) list String.Table.t
     (* non localized parameters *) *
@@ -145,14 +143,11 @@ type ('get, 'post, 'meth, 'attached, +'co, +'ext,
 
   service_mark :
     (unit, unit, 'meth,
-     'attached, co_flag, ext_flag,
-     suff, unit, unit, registrable, unit)
+     'attached, 'co, 'ext,
+     suff, unit, unit, 'reg, unit)
       service Eliom_common.wrapper;
 }
-  constraint 'co = [< co_flag ]
-  constraint 'ext = [< ext_flag ]
   constraint 'tipo = [< suff ]
-  constraint 'registr = [< registrable ]
 
 let pre_wrap s =
   {s with
@@ -201,9 +196,8 @@ let get_get_or_post s = s.meth
 
 let change_get_num service attser n =
   {service with
-   info = Attached {attser with
-                    get_name = n}}
-
+   service_mark = service_mark ();
+   info = Attached {attser with get_name = n}}
 
 (** Satic directories **)
 let static_dir_ ?(https = false) () =
@@ -306,7 +300,8 @@ let preapply ~service getparams =
       nlp service.get_params_type getparams
   in
   {service with
-   pre_applied_parameters = nlp, params@preapp;
+   service_mark = service_mark ();
+   pre_applied_parameters = nlp, params @ preapp;
    get_params_type = Eliom_parameter.unit;
    info =
      (match service.info with
@@ -726,7 +721,10 @@ let coservice
   (* (match Eliom_common.global_register_allowed () with
      | Some _ -> Eliom_common.add_unregistered k.path;
      | _ -> ()); *)
-  {fallback with
+  {pre_applied_parameters = fallback.pre_applied_parameters;
+   post_params_type = fallback.post_params_type;
+   send_appl_content = fallback.send_appl_content;
+   service_mark = service_mark ();
    max_use= max_use;
    timeout= timeout;
    get_params_type = add_pref_params Eliom_common.co_param_prefix get_params;
@@ -807,13 +805,13 @@ let coservice'
 
 let attach_coservice' :
   fallback:
-  (unit, unit, get, a_s, _, [< `Non_ext],
+  (unit, unit, get, a_s, _, non_ext,
    [< suff ], unit, unit, 'rg1, 'return1) service ->
   service:
-  ('get, 'post, 'gp, na_s, [< `Co ], [< `Non_ext],
+  ('get, 'post, 'gp, na_s, co, non_ext,
    [< `WithoutSuffix] as 'sf, 'gn, 'pn, 'rg2, 'return) service ->
-  ('get, 'post, 'gp, a_s, [> `Co ], [> `Non_ext],
-   'sf, 'gn, 'pn, [< registrable > `Unregistrable ], 'return) service =
+  ('get, 'post, 'gp, a_s, co, non_ext,
+   'sf, 'gn, 'pn, non_reg, 'return) service =
   fun ~fallback ~service ->
   let {na_name} = get_non_attached_info service in
   let fallbackkind = get_attached_info fallback in
@@ -1244,7 +1242,10 @@ let delete_coservice
   (* (match Eliom_common.global_register_allowed () with
      | Some _ -> Eliom_common.add_unregistered k.path;
      | _ -> ()); *)
-  {fallback with
+  {pre_applied_parameters = fallback.pre_applied_parameters;
+   post_params_type = fallback.post_params_type;
+   send_appl_content = fallback.send_appl_content;
+   service_mark = service_mark ();
    max_use= max_use;
    timeout= timeout;
    get_params_type = add_pref_params Eliom_common.co_param_prefix get_params;

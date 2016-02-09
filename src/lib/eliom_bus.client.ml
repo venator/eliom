@@ -59,13 +59,12 @@ let clone_exn (t,u) s =
         | _ -> ());
       raise_lwt e)
 
-type ('a, 'att) callable_bus_service =
+type ('a, 'att, 'co, 'ext, 'reg) callable_bus_service =
   (unit, 'a list, Eliom_service.post,
-   'att,
-   [`Co | `Non_co], [`Ext | `Non_ext],
+   'att, 'co, 'ext,
    [ `WithoutSuffix ], unit,
    [ `One of 'a list Eliom_parameter.ocaml ]
-     Eliom_parameter.param_name, [ `Registrable ],
+     Eliom_parameter.param_name, 'reg,
    Eliom_registration.Action.return)
     Eliom_service.service
 
@@ -73,7 +72,7 @@ let create service channel waiter =
   let write x =
     try_lwt
       lwt _ = Eliom_client.call_service
-                ~service:(service:> ('a, _) callable_bus_service) () x in
+          ~service:(service:> ('a, _, _, _, _) callable_bus_service) () x in
       Lwt.return ()
     with
       | Eliom_request.Failed_request 204 -> Lwt.return ()
@@ -109,7 +108,7 @@ let create service channel waiter =
 
 let internal_unwrap ((wrapped_bus:('a, 'b) Ecb.wrapped_bus),unwrapper) =
   let waiter () = Lwt_js.sleep 0.05 in
-  let (channel,service) = wrapped_bus in
+  let channel, Eliom_comet_base.Bus_send_service service = wrapped_bus in
   create service channel waiter
 
 let () = Eliom_unwrap.register_unwrapper Eliom_common.bus_unwrap_id internal_unwrap

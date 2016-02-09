@@ -43,12 +43,9 @@ val change_page :
   ?absolute:bool ->
   ?absolute_path:bool ->
   ?https:bool ->
-  service:('a, 'b, _, _,
-           [< `Co | `Non_co ], [ `Ext | `Non_ext ],
-           [< `WithSuffix | `WithoutSuffix ], 'd, 'e,
-           [< Eliom_service.registrable ],
-           _ Eliom_service.non_ocaml)
-          Eliom_service.service ->
+  service:
+    ('a, 'b, _, _, _, _, _, _, _, _, _ Eliom_service.non_ocaml)
+      Eliom_service.service ->
   ?hostname:string ->
   ?port:int ->
   ?fragment:string ->
@@ -73,11 +70,9 @@ val call_ocaml_service :
   ?absolute:bool ->
   ?absolute_path:bool ->
   ?https:bool ->
-  service:('a, 'b, _, _,
-           [< `Co | `Non_co ], [< `Ext | `Non_ext ],
-           [< `WithSuffix | `WithoutSuffix ], 'd, 'e,
-           [< Eliom_service.registrable ], 'return Eliom_service.ocaml)
-    Eliom_service.service ->
+  service:
+    ('a, 'b, _, _, _, _, _, _, _, _, _ Eliom_service.ocaml)
+      Eliom_service.service ->
   ?hostname:string ->
   ?port:int ->
   ?fragment:string ->
@@ -97,12 +92,9 @@ val exit_to :
   ?absolute:bool ->
   ?absolute_path:bool ->
   ?https:bool ->
-  service:('a, 'b, _, _,
-           [< `Co | `Non_co ], [< `Ext | `Non_ext ],
-           [< `WithSuffix | `WithoutSuffix ], 'd, 'e,
-           [< Eliom_service.registrable ],
-           _ Eliom_service.non_ocaml)
-          Eliom_service.service ->
+  service:
+    ('a, 'b, _, _, _, _, _, _, _, _, _ Eliom_service.non_ocaml)
+      Eliom_service.service ->
   ?hostname:string ->
   ?port:int ->
   ?fragment:string ->
@@ -118,12 +110,9 @@ val window_open :
   ?absolute:bool ->
   ?absolute_path:bool ->
   ?https:bool ->
-  service:('a, unit,
-           Eliom_service.get, _,
-           [< `Co | `Non_co ], [< `Ext | `Non_ext ],
-           [< `WithSuffix | `WithoutSuffix ], _, unit,
-           [< Eliom_service.registrable ], _)
-          Eliom_service.service ->
+  service:
+    ('a, unit, Eliom_service.get, _, _, _, _, _, unit, _, _)
+      Eliom_service.service ->
   ?hostname:string ->
   ?port:int ->
   ?fragment:string ->
@@ -139,11 +128,9 @@ val change_url :
   ?absolute:bool ->
   ?absolute_path:bool ->
   ?https:bool ->
-  service:('get, unit, Eliom_service.get,
-           _,
-           [< `Co | `Non_co ], [< `Ext | `Non_ext ],
-           [< Eliom_service.suff ], 'gn, unit,
-           [< Eliom_service.registrable ], 'return) Eliom_service.service ->
+  service:
+    ('get, unit, Eliom_service.get,
+     _, _, _, _, _, unit, _, _) Eliom_service.service ->
   ?hostname:string ->
   ?port:int ->
   ?fragment:string ->
@@ -157,11 +144,8 @@ val call_service :
   ?absolute:bool ->
   ?absolute_path:bool ->
   ?https:bool ->
-  service:('a, 'b, _, _,
-           [< `Co | `Non_co ], [< `Ext | `Non_ext ],
-           [< `WithSuffix | `WithoutSuffix ], 'd, 'e,
-           [< Eliom_service.registrable ], 'return)
-          Eliom_service.service ->
+  service:
+    ('a, 'b, _, _, _, _, _, _, _, _, _) Eliom_service.service ->
   ?hostname:string ->
   ?port:int ->
   ?fragment:string ->
@@ -172,8 +156,6 @@ val call_service :
   ?upload_progress:(int -> int -> unit) ->
   ?override_mime_type:string ->
   'a -> 'b -> string Lwt.t
-
-
 
 (** Registers some code to be executed after loading the client
     application, or after changing the page the next time.

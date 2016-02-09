@@ -357,10 +357,7 @@ module Redirection :
 "sigs/eliom_reg_alpha_return.mli"
   subst type page :=
   (unit, unit, Eliom_service.get,
-   'att,
-   [ `Co | `Non_co ], [ `Ext | `Non_ext ],
-   [ `WithoutSuffix ],
-   unit, unit, Eliom_service.registrable, 'b)
+   'att, 'co, 'ext, [ `WithoutSuffix ], unit, unit, 'reg, 'b)
     Eliom_service.service
   and type options := [ `MovedPermanently
 		      | `Found

@@ -267,8 +267,8 @@ struct
               handle_request)
 
   let get_service () =
-    ((Eliom_common.force_lazy_site_value global_service)
-     :> Ecb.comet_service)
+    Eliom_comet_base.Comet_service
+      (Eliom_common.force_lazy_site_value global_service)
 
   let get_id {ch_id} = ch_id
 
@@ -527,10 +527,11 @@ end = struct
                  empty answer *)
         Lwt.return (encode_downgoing [])
     in
-    Comet.register
-      ~scope:handler.hd_scope
-      ~service:handler.hd_service
-      f
+    let
+      {hd_service = Eliom_comet_base.Internal_comet_service service} =
+      handler
+    in
+    Comet.register ~scope:handler.hd_scope ~service f
 
 
   (** For each scope there is a reference containing the handler. The
@@ -574,14 +575,16 @@ end = struct
       | None ->
         begin
           let hd_service =
-            (* CCC ajouter possibilité d'https *)
-            Eliom_service.post_coservice
-              (*VVV Why is it attached? --Vincent *)
-              ~rt:Eliom_service.Http
-              ~fallback:(Eliom_common.force_lazy_site_value fallback_service)
-              (*~name:"comet" (* CCC faut il mettre un nom ? *)*)
-              ~post_params:Eliom_comet_base.comet_request_param
-              ()
+            Eliom_comet_base.Internal_comet_service
+              (* CCC ajouter possibilité d'https *)
+              (Eliom_service.post_coservice
+                 (*VVV Why is it attached? --Vincent *)
+                 ~rt:Eliom_service.Http
+                 ~fallback:(Eliom_common.force_lazy_site_value
+                              fallback_service)
+                 (*~name:"comet" (* CCC faut il mettre un nom ? *)*)
+                 ~post_params:Eliom_comet_base.comet_request_param
+                 ())
           in
           let hd_update_streams,hd_update_streams_w = Lwt.task () in
           let handler = {
@@ -650,11 +653,11 @@ end = struct
   let get_id {ch_id} =
     ch_id
 
-  let get_service chan =
-    (chan.ch_handler.hd_service :> comet_service)
+  let get_service
+      {ch_handler = {hd_service = Ecb.Internal_comet_service srv}} =
+    Ecb.Comet_service srv
 
 end
-
 
 module Channel :
 sig
@@ -808,7 +811,7 @@ end = struct
     in
     let last = if newest then None else Some history in
     { channel = External (Eliom_comet_base.Stateless_channel
-                            (service,
+                            (Eliom_comet_base.Comet_service service,
                              Stateless.chan_id_of_string name,
                              Eliom_comet_base.Last_kind last));
       channel_mark = channel_mark () }
