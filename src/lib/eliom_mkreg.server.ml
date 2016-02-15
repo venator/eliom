@@ -257,13 +257,14 @@ let register_aux pages
 				  ~absolute:true
 				  ~service:
 				  (service :
-				     ('a, 'b, _, _, _, Eliom_service.non_ext,
+				     ('a, 'b, _, _, _,
+                                      Eliom_service.non_ext, reg,
 				      [< `WithSuffix | `WithoutSuffix ],
-                                      'c, 'd, reg,'return)
+                                      'c, 'd,'return)
                                        Eliom_service.service :>
-				     ('a, 'b, _, _, _, _,
+				     ('a, 'b, _, _, _, _, _,
 				      [< `WithSuffix | `WithoutSuffix ],
-				      'c, 'd, _, 'return)
+				      'c, 'd, 'return)
 				     Eliom_service.service)
 				  g
 			      in
@@ -529,7 +530,9 @@ let register pages
     ?content_type
     ?headers
     ?secure_session
-    ~(service : (_, _, _, _, _, _, _, _, _, Eliom_service.reg, _) Eliom_service.service)
+    ~(service :
+        (_, _, _, _, _, _, Eliom_service.reg,
+         _, _, _, _) Eliom_service.service)
     ?error_handler
     page_gen =
   let sp = Eliom_common.get_sp_option () in
@@ -635,8 +638,8 @@ let register_coservice pages
     ~(fallback:
         (unit, unit, Eliom_service.get,
          Eliom_service.a_s,
-         _, _,
-         [ `WithoutSuffix ], unit, unit, _, 'returnT)
+         _, _, _,
+         [ `WithoutSuffix ], unit, unit, 'returnT)
           Eliom_service.service)
     ~rt
     ~get_params

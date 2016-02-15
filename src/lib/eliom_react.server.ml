@@ -102,10 +102,10 @@ struct
            'a,
            Eliom_service.post,
            Eliom_service.na_s, Eliom_service.co, Eliom_service.non_ext,
+           Eliom_service.reg,
            [ `WithoutSuffix ],
            unit,
            [ `One of 'a Eliom_parameter.ocaml ] Eliom_parameter.param_name,
-           Eliom_service.reg,
            Eliom_registration.Action.return)
             Eliom_service.service;
         wrapper : 'a t Eliom_common.wrapper }

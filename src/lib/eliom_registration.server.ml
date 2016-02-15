@@ -1386,8 +1386,8 @@ module Ocaml = struct
       ?headers
       ?secure_session
       ~(service :
-          ('get, 'post, _, _, _, Eliom_service.non_ext,
-           _, 'gn, 'pn, reg, 'return Eliom_service.ocaml)
+          ('get, 'post, _, _, _, Eliom_service.non_ext, reg,
+           _, 'gn, 'pn, 'return Eliom_service.ocaml)
             Eliom_service.service)
       ?(error_handler : ((string * exn) list -> 'return Lwt.t) option)
       (f : ('get -> 'post -> 'return Lwt.t)) =
@@ -2298,9 +2298,9 @@ module String_redirection = Eliom_mkreg.MakeRegister(String_redir_reg_base)
 module Redir_reg_base = struct
 
     type ('a, 'b, 'att, 'co, 'ext, 'reg) page =
-      (unit, unit, Eliom_service.get , 'att, 'co, 'ext,
+      (unit, unit, Eliom_service.get , 'att, 'co, 'ext, 'reg,
        [ `WithoutSuffix ],
-       unit, unit, 'reg, 'b)
+       unit, unit, 'b)
         Eliom_service.service
 
   type options =  [ `MovedPermanently

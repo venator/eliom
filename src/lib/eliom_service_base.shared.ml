@@ -115,8 +115,8 @@ type ('r, 'e) rt =
   | Unsafe : ('a, ext) rt
 
 (* 'return is the value returned by the service *)
-type ('get, 'post, 'meth, 'attached, 'co, 'ext,
-      +'tipo, 'getnames, 'postnames, 'reg, +'rt) service = {
+type ('get, 'post, 'meth, 'attached, 'co, 'ext, 'reg,
+      +'tipo, 'getnames, 'postnames, +'rt) service = {
   pre_applied_parameters:
     (string * Eliommod_parameters.param) list String.Table.t
     (* non localized parameters *) *
@@ -143,8 +143,8 @@ type ('get, 'post, 'meth, 'attached, 'co, 'ext,
 
   service_mark :
     (unit, unit, 'meth,
-     'attached, 'co, 'ext,
-     suff, unit, unit, 'reg, unit)
+     'attached, 'co, 'ext, 'reg,
+     suff, unit, unit, unit)
       service Eliom_common.wrapper;
 }
   constraint 'tipo = [< suff ]
@@ -805,13 +805,13 @@ let coservice'
 
 let attach_coservice' :
   fallback:
-  (unit, unit, get, a_s, _, non_ext,
-   [< suff ], unit, unit, 'rg1, 'return1) service ->
+    (unit, unit, get, a_s, _, non_ext, 'rg1,
+     [< suff ], unit, unit, 'return1) service ->
   service:
-  ('get, 'post, 'gp, na_s, co, non_ext,
-   [< `WithoutSuffix] as 'sf, 'gn, 'pn, 'rg2, 'return) service ->
-  ('get, 'post, 'gp, a_s, co, non_ext,
-   'sf, 'gn, 'pn, non_reg, 'return) service =
+  ('get, 'post, 'gp, na_s, co, non_ext, 'rg2,
+   [< `WithoutSuffix] as 'sf, 'gn, 'pn, 'return) service ->
+  ('get, 'post, 'gp, a_s, co, non_ext, non_reg,
+   'sf, 'gn, 'pn, 'return) service =
   fun ~fallback ~service ->
   let {na_name} = get_non_attached_info service in
   let fallbackkind = get_attached_info fallback in

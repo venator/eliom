@@ -67,6 +67,7 @@ module type S_types = sig
       - ['attached] attached or non-attached
       - ['co] co-service or regular service
       - ['ext] external or internal
+      - ['reg]: possible to register a handler on this service
       - ['tipo] the type paremeter of subtype {!suff} states the kind
         of parameters it uses: suffix or not.
       - ['gn] is the type of GET parameters names. See
@@ -75,11 +76,10 @@ module type S_types = sig
       - ['pn] is the type of POST parameters names. See
         {!Eliom_parameter.param_name} and form generation functions
         (e. g. {!Eliom_content.Html5.D.post_form}).
-      - ['reg]: possible to register a handler on this service
       - [ 'ret] is an information on what the service returns.
         See {!Eliom_registration.kind}. *)
-  type ('get, 'post, 'meth, 'attached, 'co, 'ext,
-        +'tipo, 'gn, 'pn, 'reg, +'ret) service
+  type ('get, 'post, 'meth, 'attached, 'co, 'ext, 'reg,
+        +'tipo, 'gn, 'pn, +'ret) service
     constraint 'tipo = [< `WithSuffix | `WithoutSuffix ]
 
 end
@@ -136,8 +136,8 @@ module type S = sig
       ('get, [< `WithSuffix | `WithoutSuffix ] as 'tipo,'gn)
         Eliom_parameter.params_type ->
     unit ->
-    ('get, unit, get, a_s, non_co, non_ext,
-     'tipo, 'gn, unit, reg, 'rt) service
+    ('get, unit, get, a_s, non_co, non_ext, reg,
+     'tipo, 'gn, unit, 'rt) service
 
   (** The function [post_service ~fallback ~post_params ()] creates a
       service that takes [post_params] as POST parameters and share
@@ -158,16 +158,16 @@ module type S = sig
     ?https:bool ->
     rt:('rt, _) rt ->
     fallback:
-      ('get, unit, get, a_s, 'co, non_ext,
+      ('get, unit, get, a_s, 'co, non_ext, reg,
        [< `WithSuffix | `WithoutSuffix] as 'tipo, 'gn, unit,
-       reg, 'rt) service ->
+       'rt) service ->
     ?keep_nl_params:[ `All | `Persistent | `None ] ->
     ?priority:int ->
     post_params:
       ('post, [`WithoutSuffix], 'pn) Eliom_parameter.params_type ->
     unit ->
-    ('get, 'post, post, a_s, 'co, non_ext,
-     'tipo, 'gn, 'pn, reg, 'rt) service
+    ('get, 'post, post, a_s, 'co, non_ext, reg,
+     'tipo, 'gn, 'pn, 'rt) service
 
   (** The function [put_service ~path ~get_params ()] creates a
       service that answers the HTTP PUT method, and only takes
@@ -188,8 +188,8 @@ module type S = sig
         Eliom_parameter.params_type ->
     unit ->
     ('get, Eliom_parameter.raw_post_data,
-     put, a_s, non_co, non_ext, 'tipo, 'gn,
-     Eliom_parameter.no_param_name, reg, 'rt) service
+     put, a_s, non_co, non_ext, reg, 'tipo, 'gn,
+     Eliom_parameter.no_param_name, 'rt) service
 
   (** The function [delete_service ~path ~get_params ()] creates a
       service that answers the HTTP DELETE method, and only takes
@@ -210,10 +210,9 @@ module type S = sig
         Eliom_parameter.params_type ->
     unit ->
     ('get, Eliom_parameter.raw_post_data,
-     delete, a_s,
-     non_co, non_ext,
+     delete, a_s, non_co, non_ext, reg,
      'tipo, 'gn,
-     Eliom_parameter.no_param_name, reg, 'rt) service
+     Eliom_parameter.no_param_name, 'rt) service
 
   (** {3 Attached coservices} *)
 
@@ -268,15 +267,15 @@ module type S = sig
     ?https:bool ->
     rt:('rt, _) rt ->
     fallback:
-      (unit, unit, get, a_s, non_co, non_ext,
-       [ `WithoutSuffix ] as 'tipo, unit, unit, _, 'rt)
+      (unit, unit, get, a_s, non_co, non_ext, _,
+       [ `WithoutSuffix ] as 'tipo, unit, unit, 'rt)
         service ->
     ?keep_nl_params:[ `All | `Persistent | `None ] ->
     get_params:
       ('get,[`WithoutSuffix],'gn) Eliom_parameter.params_type ->
     unit ->
-    ('get, unit, get, a_s, co, non_ext,
-     'tipo, 'gn, unit, reg, 'rt) service
+    ('get, unit, get, a_s, co, non_ext, reg,
+     'tipo, 'gn, unit, 'rt) service
 
   (** The function [post_coservice ~fallback ~post_params] creates an
       {% <<a_manual chapter="services"
@@ -301,13 +300,13 @@ module type S = sig
     ?https:bool ->
     rt:('rt, _) rt ->
     fallback:
-      ('get, unit, get, a_s, _, non_ext,
-       'tipo, 'gn, unit, reg, 'rt) service ->
+      ('get, unit, get, a_s, _, non_ext, reg,
+       'tipo, 'gn, unit, 'rt) service ->
     ?keep_nl_params:[ `All | `Persistent | `None ] ->
     post_params:
       ('post, [`WithoutSuffix], 'pn) Eliom_parameter.params_type ->
     unit ->
-    ('get, 'post, post, a_s, co, non_ext, 'tipo, 'gn, 'pn, reg, 'rt)
+    ('get, 'post, post, a_s, co, non_ext, reg, 'tipo, 'gn, 'pn, 'rt)
       service
 
   (** The function [put_coservice ~fallback ~get_params] creates an {%
@@ -332,17 +331,17 @@ module type S = sig
     ?https:bool ->
     rt:('rt, _) rt ->
     fallback:
-      (unit, Eliom_parameter.raw_post_data, put, a_s, non_co, non_ext,
-       [ `WithoutSuffix ], unit, Eliom_parameter.no_param_name, _, 'rt)
+      (unit, Eliom_parameter.raw_post_data, put, a_s, non_co, non_ext, _,
+       [ `WithoutSuffix ], unit, Eliom_parameter.no_param_name, 'rt)
         service ->
     ?keep_nl_params:[ `All | `Persistent | `None ] ->
     get_params:
       ('get,[`WithoutSuffix],'gn) Eliom_parameter.params_type ->
     unit ->
     ('get, Eliom_parameter.raw_post_data,put,
-     a_s, co, non_ext,
+     a_s, co, non_ext, reg,
      [ `WithoutSuffix ], 'gn, Eliom_parameter.no_param_name,
-     reg, 'rt) service
+     'rt) service
 
   (** The function [delete_coservice ~fallback ~get_params] creates an
       {% <<a_manual chapter="services"
@@ -367,17 +366,16 @@ module type S = sig
     rt:('rt, _) rt ->
     fallback:
       (unit, Eliom_parameter.raw_post_data, delete,
-       a_s, non_co, non_ext, [ `WithoutSuffix ],
-       unit, Eliom_parameter.no_param_name,
-       _, 'rt) service ->
+       a_s, non_co, non_ext, _, [ `WithoutSuffix ],
+       unit, Eliom_parameter.no_param_name, 'rt) service ->
     ?keep_nl_params:[ `All | `Persistent | `None ] ->
     get_params:
       ('get,[`WithoutSuffix],'gn) Eliom_parameter.params_type ->
     unit ->
     ('get, Eliom_parameter.raw_post_data,
-     delete, a_s, co, non_ext,
-     [ `WithoutSuffix ], 'gn, Eliom_parameter.no_param_name,
-     reg, 'rt) service
+     delete, a_s, co, non_ext, reg,
+     [ `WithoutSuffix ], 'gn, Eliom_parameter.no_param_name, 'rt)
+      service
 
   (** {3 Non attached coservices} *)
 
@@ -404,10 +402,8 @@ module type S = sig
     get_params:
       ('get, [`WithoutSuffix], 'gn) Eliom_parameter.params_type ->
     unit ->
-    ('get, unit, get, na_s,
-     co, non_ext, [`WithoutSuffix],
-     'gn, unit, reg, 'rt) service
-
+    ('get, unit, get, na_s, co, non_ext, reg,
+     [`WithoutSuffix], 'gn, unit, 'rt) service
 
   (** The function [post_coservice' ~post_params] creates a {%
       <<a_manual chapter="services"
@@ -438,9 +434,8 @@ module type S = sig
     post_params:
       ('post, [`WithoutSuffix], 'pn) Eliom_parameter.params_type ->
     unit ->
-    (unit, 'post,post, na_s,
-     co, non_ext, [ `WithoutSuffix ],
-     unit, 'pn, reg, 'rt) service
+    (unit, 'post,post, na_s, co, non_ext, reg, [ `WithoutSuffix ],
+     unit, 'pn, 'rt) service
 
   (** The function [put_coservice' ~get_params] creates a {%
       <<a_manual chapter="services"
@@ -464,8 +459,8 @@ module type S = sig
     get_params:
       ('get, [`WithoutSuffix], 'gn) Eliom_parameter.params_type ->
     unit ->
-    ('get, Eliom_parameter.raw_post_data, put, na_s, co, non_ext,
-     [`WithoutSuffix], 'gn, Eliom_parameter.no_param_name, reg, 'rt)
+    ('get, Eliom_parameter.raw_post_data, put, na_s, co, non_ext, reg,
+     [`WithoutSuffix], 'gn, Eliom_parameter.no_param_name, 'rt)
       service
 
   (** The function [delete_coservice' ~get_params] creates a {%
@@ -490,8 +485,9 @@ module type S = sig
     get_params:
       ('get, [`WithoutSuffix], 'gn) Eliom_parameter.params_type ->
     unit ->
-    ('get, Eliom_parameter.raw_post_data, delete, na_s, co, non_ext,
-     [`WithoutSuffix], 'gn, Eliom_parameter.no_param_name, reg, 'rt)
+    ('get, Eliom_parameter.raw_post_data,
+     delete, na_s, co, non_ext, reg,
+     [`WithoutSuffix], 'gn, Eliom_parameter.no_param_name, 'rt)
       service
 
   (** {2 External services} *)
@@ -524,8 +520,8 @@ module type S = sig
       ('get, [< `WithSuffix | `WithoutSuffix ] as 'tipo, 'gn)
         Eliom_parameter.params_type ->
     unit ->
-    ('get, unit, get, a_s, non_co, ext,
-     'tipo, 'gn, unit, non_reg, 'rt) service
+    ('get, unit, get, a_s, non_co, ext, non_reg,
+     'tipo, 'gn, unit, 'rt) service
 
   (** Same as {!external_service} but with POST method. *)
   val external_post_service :
@@ -539,8 +535,8 @@ module type S = sig
     post_params:
       ('post, [ `WithoutSuffix ], 'pn) Eliom_parameter.params_type ->
     unit ->
-    ('get, 'post, post, a_s, non_co, ext, 'tipo,
-     'gn, 'pn, non_reg, 'rt) service
+    ('get, 'post, post, a_s, non_co, ext, non_reg,
+     'tipo, 'gn, 'pn, 'rt) service
 
   (** Same as {!external_service} but with PUT method. *)
   val external_put_service :
@@ -553,8 +549,8 @@ module type S = sig
         Eliom_parameter.params_type ->
     unit ->
     ('get, Eliom_parameter.raw_post_data,
-     put, a_s, non_co, ext, 'tipo,
-     'gn, Eliom_parameter.no_param_name, non_reg, 'rt)
+     put, a_s, non_co, ext, non_reg,
+     'tipo, 'gn, Eliom_parameter.no_param_name, 'rt)
       service
 
   (** Same as {!external_service} but with DELETE method. *)
@@ -568,8 +564,8 @@ module type S = sig
         Eliom_parameter.params_type ->
     unit ->
     ('get, Eliom_parameter.raw_post_data,
-     delete, a_s, non_co, ext, 'tipo,
-     'gn, Eliom_parameter.no_param_name, non_reg, 'rt)
+     delete, a_s, non_co, ext, non_reg,
+     'tipo, 'gn, Eliom_parameter.no_param_name, 'rt)
       service
 
   (** {2 Predefined services} *)
@@ -585,27 +581,27 @@ module type S = sig
       but you can use it with <a> links, not only forms.  It does not
       keep non attached GET parameters.  *)
   val void_coservice' :
-    (unit, unit, get, na_s, co, non_ext, [ `WithoutSuffix ],
-     unit, unit, non_reg, _ non_ocaml)
+    (unit, unit, get, na_s, co, non_ext, non_reg,
+     [ `WithoutSuffix ], unit, unit, _ non_ocaml)
       service
 
   (** Same as {!void_coservice'} but forcing https. *)
   val https_void_coservice' :
-    (unit, unit, get, na_s, co, non_ext, [ `WithoutSuffix ],
-     unit, unit, non_reg, _ non_ocaml)
+    (unit, unit, get, na_s, co, non_ext, non_reg,
+     [ `WithoutSuffix ], unit, unit, _ non_ocaml)
       service
 
   (** Same as {!void_coservice'} but keeps non attached GET
   parameters. *)
   val void_hidden_coservice' :
-    (unit, unit, get, na_s, co, non_ext, [ `WithoutSuffix ],
-     unit, unit, non_reg, _ non_ocaml)
+    (unit, unit, get, na_s, co, non_ext, non_reg,
+     [ `WithoutSuffix ], unit, unit, _ non_ocaml)
       service
 
   (** Same as {!void_hidden_coservice'} but forcing https. *)
   val https_void_hidden_coservice' :
-    (unit, unit, get, na_s, co, non_ext, [ `WithoutSuffix ],
-     unit, unit, non_reg, _ non_ocaml)
+    (unit, unit, get, na_s, co, non_ext, non_reg,
+     [ `WithoutSuffix ], unit, unit, _ non_ocaml)
       service
 
   (** {3 Static files} *)
@@ -618,17 +614,17 @@ module type S = sig
       extension. *)
   val static_dir :
     unit ->
-    (string list, unit, get, a_s, non_co, non_ext, [ `WithSuffix ],
-     [ `One of string list ] Eliom_parameter.param_name,
-     unit, non_reg, http non_ocaml)
+    (string list, unit, get, a_s, non_co, non_ext, non_reg,
+     [ `WithSuffix ], [ `One of string list ] Eliom_parameter.param_name,
+     unit, http non_ocaml)
       service
 
   (** Same as {!static_dir} but forcing https link. *)
   val https_static_dir :
     unit ->
-    (string list, unit, get, a_s, non_co, non_ext, [ `WithSuffix ],
-     [ `One of string list ] Eliom_parameter.param_name,
-     unit, non_reg, http non_ocaml)
+    (string list, unit, get, a_s, non_co, non_ext, non_reg,
+     [ `WithSuffix ], [ `One of string list ] Eliom_parameter.param_name,
+     unit, http non_ocaml)
       service
 
   (** Like [static_dir], but allows one to put GET parameters *)
@@ -636,9 +632,10 @@ module type S = sig
     ?keep_nl_params:[ `All | `Persistent | `None ] ->
     get_params:('a, [`WithoutSuffix], 'an) Eliom_parameter.params_type ->
     unit ->
-    ((string list * 'a), unit, get, a_s, non_co, non_ext, [ `WithSuffix ],
+    ((string list * 'a), unit, get, a_s, non_co, non_ext, non_reg,
+     [ `WithSuffix ],
      [ `One of string list ] Eliom_parameter.param_name *'an,
-     unit, non_reg, http non_ocaml)
+     unit, http non_ocaml)
       service
 
   (** Same as {!static_dir_with_params} but forcing https link. *)
@@ -646,9 +643,10 @@ module type S = sig
     ?keep_nl_params:[ `All | `Persistent | `None ] ->
     get_params:('a, [`WithoutSuffix], 'an) Eliom_parameter.params_type ->
     unit ->
-    ((string list * 'a), unit, get, a_s, non_co, non_ext, [ `WithSuffix ],
+    ((string list * 'a), unit, get, a_s, non_co, non_ext, non_reg,
+     [ `WithSuffix ],
      [ `One of string list ] Eliom_parameter.param_name *'an,
-     unit, non_reg, http non_ocaml)
+     unit, http non_ocaml)
       service
 
   (** {2 Miscellaneous} *)
@@ -660,11 +658,11 @@ module type S = sig
       coservices *)
   val preapply :
     service:
-      ('a, 'b, 'meth, a_s, 'co, 'ext, _, 'e, 'f, 'g, 'return)
+      ('a, 'b, 'meth, a_s, 'co, 'ext, 'reg, _, 'e, 'f, 'return)
       service ->
     'a ->
-    (unit, 'b, 'meth, a_s, 'co, 'ext,
-     [ `WithoutSuffix ], unit, 'f, non_reg, 'return) service
+    (unit, 'b, 'meth, a_s, 'co, 'ext, non_reg,
+     [ `WithoutSuffix ], unit, 'f, 'return) service
 
   (** [attach_coservice' ~fallback ~service] attaches the non-attached
       coservice [service] on the URL of [fallback]. This allows to
@@ -673,13 +671,13 @@ module type S = sig
       on the service returned by this function. *)
   val attach_coservice' :
     fallback:
-      (unit, unit, get, a_s, _, non_ext,
-       _, unit, unit, 'rg1, 'return1) service ->
+      (unit, unit, get, a_s, _, non_ext, 'rg1,
+       _, unit, unit, 'return1) service ->
     service:
-      ('get, 'post, 'meth, na_s, co, non_ext,
-       [< `WithoutSuffix] as 'sf, 'gn, 'pn, 'rg2, 'return) service ->
-    ('get, 'post, 'meth, a_s, co, non_ext,
-     'sf, 'gn, 'pn, non_reg, 'return) service
+      ('get, 'post, 'meth, na_s, co, non_ext, 'rg2,
+       [< `WithoutSuffix] as 'sf, 'gn, 'pn, 'return) service ->
+    ('get, 'post, 'meth, a_s, co, non_ext, non_reg,
+     'sf, 'gn, 'pn, 'return) service
 
   (** The function [add_non_localized_get_parameters ~params ~service]
       Adds non localized GET parameters [params] to [service]. See the
@@ -691,10 +689,11 @@ module type S = sig
       ('p, [ `WithoutSuffix ], 'pn)
       Eliom_parameter.non_localized_params ->
     service:
-      ('a, 'b, 'meth, 'attach, 'co, 'ext, 'd, 'e, 'f, 'g, 'return)
+      ('a, 'b, 'meth, 'attach, 'co, 'ext, 'reg,
+       'd, 'e, 'f, 'return)
       service ->
-    ('a * 'p, 'b, 'meth, 'attach, 'co, 'ext,
-     'd, 'e * 'pn, 'f, 'g, 'return) service
+    ('a * 'p, 'b, 'meth, 'attach, 'co, 'ext, 'reg,
+     'd, 'e * 'pn, 'f, 'return) service
 
   (** Same as {!add_non_localized_get_parameters} but with POST
       parameters.*)
@@ -703,10 +702,10 @@ module type S = sig
       ('p, [ `WithoutSuffix ], 'pn)
       Eliom_parameter.non_localized_params ->
     service:
-      ('a, 'b, 'meth, 'attach, 'co, 'ext,
-       'd, 'e, 'f, 'g, 'return) service ->
-    ('a, 'b * 'p, 'meth, 'attach, 'co, 'ext,
-     'd, 'e, 'f * 'pn, 'g, 'return) service
+      ('a, 'b, 'meth, 'attach, 'co, 'ext, 'g,
+       'd, 'e, 'f, 'return) service ->
+    ('a, 'b * 'p, 'meth, 'attach, 'co, 'ext, 'g,
+     'd, 'e, 'f * 'pn, 'return) service
 
   (**/**)
 
@@ -724,11 +723,11 @@ module type S = sig
   val is_external : (_, _, _, _, _, _, _, _, _, _, _) service -> bool
 
   val get_get_params_type_ :
-    ('a, _, _, _, _, _, 'b, 'c, _, _, _) service ->
+    ('a, _, _, _, _, _, _, 'b, 'c,  _, _) service ->
     ('a, 'b, 'c) Eliom_parameter.params_type
 
   val get_post_params_type_ :
-    (_, 'a, _, _, _, _, _, _, 'b, _, _) service ->
+    (_, 'a, _, _, _, _, _, _, _, 'b, _) service ->
     ('a, [ `WithoutSuffix ], 'b) Eliom_parameter.params_type
 
   val get_sub_path_ : a_s -> Eliom_lib.Url.path
@@ -768,10 +767,10 @@ module type S = sig
     [ `All | `Persistent | `None ]
 
   val change_get_num :
-    ('a, 'b, 'meth, a_s, 'co, 'ext, 'd, 'e, 'f, 'g, 'return) service ->
+    ('a, 'b, 'meth, a_s, 'co, 'ext, 'rg0, 'd, 'e, 'f, 'return) service ->
     a_s ->
     Eliom_common.att_key_serv ->
-    ('a, 'b, 'meth, a_s, 'co, 'ext, 'd, 'e, 'f, 'i, 'return) service
+    ('a, 'b, 'meth, a_s, 'co, 'ext, 'rg1, 'd, 'e, 'f, 'return) service
 
   (* Not implemented on client side: TODO should not be called in
      Eliom_uri *)

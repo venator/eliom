@@ -101,7 +101,7 @@ module type LINKS = sig
     ?absolute_path:bool ->
     ?https:bool ->
     service:
-      ('get, unit, Eliom_service.get, _, _, _, _, _, unit, _, _)
+      ('get, unit, Eliom_service.get, _, _, _, _, _, _, unit, _)
         Eliom_service.service ->
     ?hostname:string ->
     ?port:int ->
@@ -187,8 +187,8 @@ module type LINKS = sig
     ?https:bool ->
     ?a:Html5_types.a_attrib attrib list ->
     service:
-      ('get, unit, Eliom_service.get, _, _, _,
-       _, _, unit, _, _ Eliom_service.non_ocaml)
+      ('get, unit, Eliom_service.get, _, _, _, _,
+       _, _, unit, _ Eliom_service.non_ocaml)
         Eliom_service.service ->
     ?hostname:string ->
     ?port:int ->
@@ -278,8 +278,8 @@ module type S = sig
     ?https:bool ->
     ?a:Html5_types.form_attrib attrib list ->
     service:
-      ('get, unit, Eliom_service.get, _, _, _,
-       _, 'gn, _, _, _ non_ocaml)
+      ('get, unit, Eliom_service.get, _, _, _, _, _,
+       'gn, _, _ non_ocaml)
         service ->
     ?hostname:string ->
     ?port:int ->
@@ -298,7 +298,7 @@ module type S = sig
     ?https:bool ->
     ?a:Html5_types.form_attrib attrib list ->
     service:
-      ('get, unit, Eliom_service.get, _, _, _, _, 'gn, _, _, _ non_ocaml)
+      ('get, unit, Eliom_service.get, _, _, _, _, _, 'gn, _, _ non_ocaml)
         service ->
     ?hostname:string ->
     ?port:int ->
@@ -329,8 +329,8 @@ module type S = sig
     ?https:bool ->
     ?a:Html5_types.form_attrib attrib list ->
     service:
-      ('get, _, Eliom_service.post, _, _, _,
-       _, _, 'pn, _, _ non_ocaml)
+      ('get, _, Eliom_service.post, _, _, _, _,
+       _, _, 'pn, _ non_ocaml)
         service ->
     ?hostname:string ->
     ?port:int ->
@@ -351,7 +351,7 @@ module type S = sig
     ?https:bool ->
     ?a:Html5_types.form_attrib attrib list ->
     service:
-      ('get, _, Eliom_service.post, _, _, _, _, _, 'pn, _, _ non_ocaml)
+      ('get, _, Eliom_service.post, _, _, _, _, _, _, 'pn, _ non_ocaml)
         service ->
     ?hostname:string ->
     ?port:int ->

@@ -68,11 +68,10 @@ deriving (Json)
 type comet_service =
     Comet_service :
       (unit, comet_request, Eliom_service.post, Eliom_service.a_s,
-       'co, 'ext,
+       'co, 'ext, 'reg,
        [ `WithoutSuffix ], unit,
        [ `One of comet_request Eliom_parameter.ocaml ]
          Eliom_parameter.param_name,
-       'reg,
        Eliom_service.http Eliom_service.non_ocaml)
         Eliom_service.service ->
     comet_service
@@ -80,11 +79,10 @@ type comet_service =
 type internal_comet_service =
     Internal_comet_service :
       (unit, comet_request, Eliom_service.post, Eliom_service.a_s,
-       'co, Eliom_service.non_ext,
+       'co, Eliom_service.non_ext, Eliom_service.reg,
        [ `WithoutSuffix ], unit,
        [ `One of comet_request Eliom_parameter.ocaml ]
          Eliom_parameter.param_name,
-       Eliom_service.reg,
        Eliom_service.http Eliom_service.non_ocaml)
         Eliom_service.service ->
     internal_comet_service
@@ -102,11 +100,10 @@ type 'a bus_send_service =
   Bus_send_service :
     (unit,
      'a list, Eliom_service.post, Eliom_service.na_s,
-     Eliom_service.co, Eliom_service.non_ext,
+     Eliom_service.co, Eliom_service.non_ext, Eliom_service.reg,
      [ `WithoutSuffix ],
      unit,
      [ `One of 'a list Eliom_parameter.ocaml ] Eliom_parameter.param_name,
-     Eliom_service.reg,
      Eliom_service.http Eliom_service.non_ocaml
     ) Eliom_service.service ->
   'a bus_send_service

@@ -111,7 +111,7 @@ val window_open :
   ?absolute_path:bool ->
   ?https:bool ->
   service:
-    ('a, unit, Eliom_service.get, _, _, _, _, _, unit, _, _)
+    ('a, unit, Eliom_service.get, _, _, _, _, _, _, unit, _)
       Eliom_service.service ->
   ?hostname:string ->
   ?port:int ->
@@ -130,7 +130,7 @@ val change_url :
   ?https:bool ->
   service:
     ('get, unit, Eliom_service.get,
-     _, _, _, _, _, unit, _, _) Eliom_service.service ->
+     _, _, _, _, _, _, unit, _) Eliom_service.service ->
   ?hostname:string ->
   ?port:int ->
   ?fragment:string ->

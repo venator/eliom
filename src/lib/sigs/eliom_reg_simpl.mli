@@ -45,7 +45,7 @@ val register :
   ?headers: Http_headers.t ->
   ?secure_session:bool ->
   service:
-    ('get, 'post, _, _, _, non_ext, _, _, _, reg, returnT) service ->
+    ('get, 'post, _, _, _, non_ext, reg, _, _, _, returnT) service ->
   ?error_handler:((string * exn) list -> page Lwt.t) ->
   ('get -> 'post -> page Lwt.t) ->
   unit
@@ -66,9 +66,8 @@ val register_service :
   get_params:('get, [< suff ] as 'tipo, 'gn) params_type ->
   ?error_handler:((string * exn) list -> page Lwt.t) ->
   ('get -> unit -> page Lwt.t) ->
-  ('get, unit, get, a_s,
-   non_co, non_ext,
-   'tipo, 'gn, unit, reg, returnB) service
+  ('get, unit, get, a_s, non_co, non_ext, reg,
+   'tipo, 'gn, unit, returnB) service
 
 (** Same as {!Eliom_service.Http.coservice} followed by {!register}. *)
 val register_coservice :
@@ -87,15 +86,14 @@ val register_coservice :
   ?timeout:float ->
   ?https:bool ->
   fallback:
-    (unit, unit, get, a_s, non_co, non_ext,
-     [ `WithoutSuffix ] as 'tipo,
-     unit, unit, _, returnT)
+    (unit, unit, get, a_s, non_co, non_ext, _,
+     [ `WithoutSuffix ] as 'tipo, unit, unit, returnT)
     service ->
   get_params:
     ('get, [`WithoutSuffix], 'gn) params_type ->
   ?error_handler:((string * exn) list -> page Lwt.t) ->
   ('get -> unit -> page Lwt.t) ->
-  ('get, unit, get, a_s, co, non_ext, 'tipo, 'gn, unit, reg, returnB)
+  ('get, unit, get, a_s, co, non_ext, reg, 'tipo, 'gn, unit, returnB)
     service
 
 
@@ -119,7 +117,7 @@ val register_coservice' :
     ('get, [`WithoutSuffix] as 'tipo, 'gn) params_type ->
   ?error_handler:((string * exn) list -> page Lwt.t) ->
   ('get -> unit -> page Lwt.t) ->
-  ('get, unit, get, na_s, co, non_ext, 'tipo, 'gn, unit, reg, returnB)
+  ('get, unit, get, na_s, co, non_ext, reg, 'tipo, 'gn, unit, returnB)
     service
 
 
@@ -136,13 +134,13 @@ val register_post_service :
   ?priority:int ->
   fallback:
     ('get, unit, get, a_s,
-     'co, non_ext, 'tipo, 'gn, unit, reg, returnT)
+     'co, non_ext, reg, 'tipo, 'gn, unit, returnT)
       service ->
   post_params:('post, [ `WithoutSuffix ], 'pn) params_type ->
   ?error_handler:((string * exn) list -> page Lwt.t) ->
   ('get -> 'post -> page Lwt.t) ->
-  ('get, 'post, post, a_s, 'co,
-   non_ext, 'tipo, 'gn, 'pn, reg, returnB)
+  ('get, 'post, post, a_s, 'co, non_ext, reg,
+   'tipo, 'gn, 'pn, returnB)
     service
 
 (** Same as {!Eliom_service.Http.post_coservice} followed by {!register}. *)
@@ -162,12 +160,12 @@ val register_post_coservice :
   ?timeout:float ->
   ?https:bool ->
   fallback:
-    ('get, unit , get, a_s, _, non_ext, 'tipo, 'gn, unit, reg, returnT)
+    ('get, unit , get, a_s, _, non_ext, reg, 'tipo, 'gn, unit, returnT)
       service ->
   post_params:('post, [ `WithoutSuffix ], 'pn) params_type ->
   ?error_handler:((string * exn) list -> page Lwt.t) ->
   ('get -> 'post -> page Lwt.t) ->
-  ('get, 'post, post, a_s, co, non_ext, 'tipo, 'gn, 'pn, reg, returnB)
+  ('get, 'post, post, a_s, co, non_ext, reg, 'tipo, 'gn, 'pn, returnB)
     service
 
 (** Same as {!Eliom_service.Http.post_coservice'} followed by {!register}. *)
@@ -190,8 +188,8 @@ val register_post_coservice' :
   post_params:('post, [ `WithoutSuffix ], 'pn) params_type ->
   ?error_handler:((string * exn) list -> page Lwt.t) ->
   (unit -> 'post -> page Lwt.t) ->
-  (unit, 'post, post, na_s, co, non_ext,
-   [ `WithoutSuffix ], unit, 'pn, reg, returnB)
+  (unit, 'post, post, na_s, co, non_ext, reg,
+   [ `WithoutSuffix ], unit, 'pn, returnB)
     service
 
 (** Same as {!Eliom_service.Http.put_service} followed by {!register}. *)
@@ -209,8 +207,8 @@ val register_put_service :
   get_params:('get, [< suff ] as 'tipo, 'gn) params_type ->
   ?error_handler:((string * exn) list -> page Lwt.t) ->
   ('get -> raw_post_data -> page Lwt.t) ->
-  ('get, raw_post_data, put, a_s, non_co, non_ext,
-   'tipo, 'gn, no_param_name, reg, returnB) service
+  ('get, raw_post_data, put, a_s, non_co, non_ext, reg,
+   'tipo, 'gn, no_param_name, returnB) service
 
 (** Same as {!Eliom_service.Http.put_coservice} followed by {!register}. *)
 val register_put_coservice :
@@ -228,16 +226,16 @@ val register_put_coservice :
   ?max_use:int ->
   ?timeout:float ->
   ?https:bool ->
-  fallback:(unit, raw_post_data, put, a_s, non_co, non_ext,
-            [ `WithoutSuffix ] as 'tipo,
-            unit, no_param_name, reg, returnT)
+  fallback:
+    (unit, raw_post_data, put, a_s, non_co, non_ext, reg,
+     [ `WithoutSuffix ], unit, no_param_name, returnT)
     service ->
   get_params:
     ('get, [`WithoutSuffix], 'gn) params_type ->
   ?error_handler:((string * exn) list -> page Lwt.t) ->
   ('get -> raw_post_data -> page Lwt.t) ->
-  ('get, raw_post_data, put, a_s, co, non_ext,
-   'tipo, 'gn, no_param_name, reg, returnB)
+  ('get, raw_post_data, put, a_s, co, non_ext, reg,
+   [ `WithoutSuffix ], 'gn, no_param_name, returnB)
     service
 
 (** Same as {!Eliom_service.Http.put_coservice'} followed by {!register}. *)
@@ -257,11 +255,11 @@ val register_put_coservice' :
   ?timeout:float ->
   ?https:bool ->
   get_params:
-    ('get, [`WithoutSuffix] as 'tipo, 'gn) params_type ->
+    ('get, [`WithoutSuffix], 'gn) params_type ->
   ?error_handler:((string * exn) list -> page Lwt.t) ->
   ('get -> raw_post_data -> page Lwt.t) ->
-  ('get, raw_post_data, put, na_s, co, non_ext,
-   'tipo, 'gn, no_param_name, reg, returnB)
+  ('get, raw_post_data, put, na_s, co, non_ext, reg,
+   [`WithoutSuffix], 'gn, no_param_name, returnB)
     service
 
 (** Same as {!Eliom_service.Http.delete_service} followed by {!register}. *)
@@ -279,8 +277,8 @@ val register_delete_service :
   get_params:('get, [< suff ] as 'tipo, 'gn) params_type ->
   ?error_handler:((string * exn) list -> page Lwt.t) ->
   ('get -> raw_post_data -> page Lwt.t) ->
-  ('get, raw_post_data, delete, a_s, non_co, non_ext,
-   'tipo, 'gn, no_param_name, reg, returnB)
+  ('get, raw_post_data, delete, a_s, non_co, non_ext, reg,
+   'tipo, 'gn, no_param_name, returnB)
     service
 
 (** Same as {!Eliom_service.Http.delete_coservice} followed by {!register}. *)
@@ -300,15 +298,15 @@ val register_delete_coservice :
   ?timeout:float ->
   ?https:bool ->
   fallback:
-    (unit, raw_post_data, delete, a_s, non_co, non_ext,
-     [ `WithoutSuffix ] as 'tipo, unit, no_param_name, _, returnT)
+    (unit, raw_post_data, delete, a_s, non_co, non_ext, _,
+     [ `WithoutSuffix ] as 'tipo, unit, no_param_name, returnT)
     service ->
   get_params:
     ('get, [`WithoutSuffix], 'gn) params_type ->
   ?error_handler:((string * exn) list -> page Lwt.t) ->
   ('get -> raw_post_data -> page Lwt.t) ->
-  ('get, raw_post_data, delete, a_s, co, non_ext,
-   'tipo, 'gn, no_param_name, reg, returnB)
+  ('get, raw_post_data, delete, a_s, co, non_ext, reg,
+   'tipo, 'gn, no_param_name, returnB)
     service
 
 (** Same as {!Eliom_service.Http.delete_coservice'} followed by {!register}. *)
@@ -331,8 +329,8 @@ val register_delete_coservice' :
     ('get, [`WithoutSuffix] as 'tipo, 'gn) params_type ->
   ?error_handler:((string * exn) list -> page Lwt.t) ->
   ('get -> raw_post_data -> page Lwt.t) ->
-  ('get, raw_post_data, delete, na_s, co, non_ext,
-   'tipo, 'gn, no_param_name, reg, returnB)
+  ('get, raw_post_data, delete, na_s, co, non_ext, reg,
+   'tipo, 'gn, no_param_name, returnB)
     service
 
 (** {2 Low-level function } *)
