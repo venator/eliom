@@ -258,11 +258,12 @@ let register_aux pages
 				  ~service:
 				  (service :
 				     ('a, 'b, _, _, _, Eliom_service.non_ext,
-				      [< Eliom_service.suff ], 'c, 'd, reg,
-				      'return) Eliom_service.service :>
+				      [< `WithSuffix | `WithoutSuffix ],
+                                      'c, 'd, reg,'return)
+                                       Eliom_service.service :>
 				     ('a, 'b, _, _, _, _,
-				      [< Eliom_service.suff ], 'c, 'd,
-				      _, 'return)
+				      [< `WithSuffix | `WithoutSuffix ],
+				      'c, 'd, _, 'return)
 				     Eliom_service.service)
 				  g
 			      in
